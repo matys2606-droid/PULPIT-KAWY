@@ -1,5 +1,5 @@
 {
-  "lastAttemptAt": "2026-10-22T21:55:51+00:00",
+  "lastAttemptAt": "2026-10-22T22:19:05+00:00",
   "errors": [],
   "latest": {
     "date": "2026-10-21",
@@ -64,7 +64,7 @@
       "sourceUrl": "https://coffeeboard.gov.in/"
     }
   ],
-  "lastSuccessAt": "2026-10-22T21:55:51+00:00",
+  "lastSuccessAt": "2026-10-22T22:19:05+00:00",
   "fx": {
     "usd": {
       "rate": 3.8886,
@@ -79,5 +79,9 @@
       "source": "NBP tabela A"
     }
   },
-  "schemaVersion": 1
+  "schemaVersion": 1,
+  "warnings": [
+    "Investing: HTTP Error 403: Forbidden. Próba źródła zapasowego.",
+    "Użyto źródła zapasowego: Coffee Board of India."
+  ]
 }
