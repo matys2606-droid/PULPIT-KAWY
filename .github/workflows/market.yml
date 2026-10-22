@@ -1,0 +1,58 @@
+name: Aktualizacja danych i publikacja pulpitu
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: '17 6 * * *'
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: coffee-pages
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test parsera i ochrony danych
+        run: python -m unittest discover -s tests -v
+      - name: Pobierz notowania i kursy NBP
+        id: refresh
+        continue-on-error: true
+        run: python scripts/update_market.py
+      - name: Zapisz dane i historię w repozytorium
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/market.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Aktualizacja dziennych danych rynku kawy"
+            git push
+          fi
+      - name: Zbuduj statyczną stronę
+        run: |
+          mkdir -p _site/data
+          cp index.html .nojekyll _site/
+          cp data/market.json _site/data/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - name: Publikuj GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+      - name: Zgłoś niepełną aktualizację po publikacji ostatnich dobrych danych
+        if: steps.refresh.outcome == 'failure'
+        run: |
+          echo 'Źródło danych nie odpowiedziało poprawnie. Opublikowano ostatnie prawidłowe dane i komunikat o błędzie.'
+          exit 1

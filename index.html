@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pulpit rynku kawy — monitor notowań</title>
+<link rel="preconnect" href="https://api.fontshare.com" />
+<link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js" integrity="sha384-JUh163oCRItcbPme8pYnROHQMC6fNKTBWtRG3I3I0erJkzNgL7uxKlNwcrcFKeqF" crossorigin="anonymous"></script>
+<style>
+:root{
+  --bg:#f6f2ea; --surface:#fffdf8; --surface-2:#f1ebe0; --border:#ddd2c1; --divider:#e7dece;
+  --text:#2a1e14; --muted:#7c6a58; --faint:#a9998a;
+  --brand:#6f3b1d; --brand-2:#a8551f; --accent:#0e6b5c;
+  --arabica:#a8551f; --robusta:#3f6f4a; --warn:#b4421f; --ok:#0e6b5c;
+  --radius:14px; --shadow:0 1px 2px rgba(42,30,20,.06),0 8px 24px rgba(42,30,20,.05);
+}
+html[data-theme="dark"]{
+  --bg:#17120d; --surface:#201911; --surface-2:#2a2118; --border:#3c3125; --divider:#332a1f;
+  --text:#f3ece1; --muted:#b3a291; --faint:#7d6e5e;
+  --brand:#e5b98d; --brand-2:#d98d4f; --accent:#4cc4ac;
+  --arabica:#e3a06a; --robusta:#7fc08f; --warn:#f08a6a; --ok:#4cc4ac;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Satoshi,"Segoe UI",system-ui,sans-serif;font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums lining-nums}
+a{color:var(--brand-2)}
+header.top{position:sticky;top:0;z-index:20;background:color-mix(in oklab,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--divider)}
+.wrap{max-width:1200px;margin:0 auto;padding:0 20px}
+.topbar{display:flex;align-items:center;gap:16px;padding:14px 0}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:-.01em}
+.brand span{font-size:15px}
+.spacer{flex:1}
+.tabs{display:flex;gap:4px;flex-wrap:wrap}
+.tab{border:1px solid var(--border);background:var(--surface);color:var(--muted);padding:7px 12px;border-radius:999px;font-size:14px;font-weight:500;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--brand);color:#fff8ef;border-color:var(--brand)}
+html[data-theme="dark"] .tab[aria-selected="true"]{color:#1b130c}
+.icon-btn{border:1px solid var(--border);background:var(--surface);color:var(--text);width:36px;height:36px;border-radius:10px;cursor:pointer;display:grid;place-items:center}
+h1{font-size:clamp(1.5rem,1.2rem+1vw,2.1rem);margin:26px 0 6px;letter-spacing:-.02em}
+.sub{color:var(--muted);font-size:15px;margin:0 0 22px}
+h2{font-size:20px;margin:34px 0 4px;letter-spacing:-.01em}
+h3{font-size:16px;margin:0 0 8px}
+.lead{color:var(--muted);font-size:14px;margin:0 0 16px}
+.grid{display:grid;gap:16px}
+.kpis{grid-template-columns:repeat(auto-fit,minmax(215px,1fr))}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+.kpi-label{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);font-weight:600}
+.kpi-val{font-size:30px;font-weight:700;letter-spacing:-.02em;margin:6px 0 2px}
+.kpi-unit{font-size:14px;color:var(--muted);font-weight:500}
+.kpi-meta{font-size:13px;color:var(--muted);margin-top:6px}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:3px 8px;border-radius:999px}
+.chip.down{background:color-mix(in oklab,var(--warn) 16%,transparent);color:var(--warn)}
+.chip.up{background:color-mix(in oklab,var(--ok) 16%,transparent);color:var(--ok)}
+.chip.neutral{background:var(--surface-2);color:var(--muted)}
+.chart-box{position:relative;height:340px}
+.chart-box.sm{height:280px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--divider)}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+table td:first-child,table td:nth-child(3){white-space:nowrap}
+.table-scroll{overflow-x:auto}
+.two{grid-template-columns:1.25fr .75fr;align-items:start}
+.grid>*{min-width:0}
+.two.even{grid-template-columns:1fr 1fr}
+@media (max-width:860px){.two.even{grid-template-columns:1fr}}
+.drivers{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.driver-head{display:flex;justify-content:space-between;align-items:start;gap:10px;margin-bottom:8px}
+.bar{height:7px;border-radius:99px;background:var(--surface-2);overflow:hidden;margin:12px 0 8px}
+.bar i{display:block;height:100%;border-radius:99px}
+.small{font-size:13px;color:var(--muted)}
+.ctrl{margin-bottom:16px}
+.ctrl label{display:flex;justify-content:space-between;font-size:14px;font-weight:600;margin-bottom:6px}
+.ctrl output{font-variant-numeric:tabular-nums;color:var(--brand-2)}
+input[type=range]{width:100%;accent-color:var(--brand-2)}
+.presets{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 18px}
+.preset{border:1px solid var(--border);background:var(--surface-2);color:var(--text);border-radius:8px;padding:6px 10px;font-size:13px;cursor:pointer;font-weight:500}
+.preset:hover{border-color:var(--brand-2)}
+.res{display:grid;gap:10px;grid-template-columns:1fr 1fr;margin-top:6px}
+.res .box{background:var(--surface-2);border-radius:10px;padding:12px}
+.res .box b{display:block;font-size:24px;letter-spacing:-.02em}
+.footnote{font-size:12.5px;color:var(--faint);margin-top:10px}
+section{scroll-margin-top:80px}
+.panel{display:none}
+.panel.active{display:block}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-bottom:10px}
+.dot{width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:6px}
+footer{border-top:1px solid var(--divider);margin-top:48px;padding:24px 0 48px;font-size:13px;color:var(--muted)}
+@media (max-width:860px){.two{grid-template-columns:1fr}.res{grid-template-columns:1fr}}
+@media (max-width:760px){.brand span{display:none}.topbar{gap:10px}}
+.preset.on{background:var(--brand);color:#fff8ef;border-color:var(--brand)}
+html[data-theme="dark"] .preset.on{color:#1b130c}
+.field{display:flex;gap:8px;align-items:stretch}
+.inp{flex:1;min-width:0;border:1px solid var(--border);background:var(--surface-2);color:var(--text);border-radius:8px;padding:8px 10px;font:inherit;font-size:15px;font-variant-numeric:tabular-nums}
+.inp:focus,.sel:focus{outline:2px solid var(--brand-2);outline-offset:1px}
+.sel{border:1px solid var(--border);background:var(--surface-2);color:var(--text);border-radius:8px;padding:8px 10px;font:inherit;font-size:14px}
+.fx-status{font-size:12.5px;color:var(--muted);margin-top:6px}
+.fx-status.ok::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--ok);margin-right:6px;vertical-align:1px}
+.res.three{grid-template-columns:1fr 1fr}
+.res .box.hl{background:color-mix(in oklab,var(--brand-2) 14%,var(--surface-2))}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:560px){.row2{grid-template-columns:1fr}}
+.ctrl>.inp{width:100%;box-sizing:border-box}
+.row2>*{min-width:0}
+.field>.inp{width:0}
+span.sel{display:flex;align-items:center;white-space:nowrap;color:var(--muted)}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap topbar">
+    <div class="brand">
+      <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-label="Logo pulpitu kawowego">
+        <circle cx="16" cy="16" r="15" stroke="currentColor" stroke-width="2"/>
+        <path d="M16 4c-4 4.5-4 7.5 0 12s4 7.5 0 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <path d="M6 16h20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span>Pulpit rynku kawy</span>
+    </div>
+    <div class="spacer"></div>
+    <nav class="tabs" role="tablist">
+      <button class="tab" role="tab" aria-selected="true" data-panel="rynek">Rynek</button>
+      <button class="tab" role="tab" aria-selected="false" data-panel="prognozy">Prognozy</button>
+      <button class="tab" role="tab" aria-selected="false" data-panel="czynniki">Czynniki</button>
+      <button class="tab" role="tab" aria-selected="false" data-panel="kalkulator">Kalkulator</button>
+      <button class="tab" role="tab" aria-selected="false" data-panel="przelicznik">Przelicznik PLN/kg</button>
+    </nav>
+    <button class="icon-btn" id="theme" title="Przełącz motyw" aria-label="Przełącz motyw">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M19 5l-1.5 1.5M6.5 17.5L5 19"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="wrap">
+  <h1>Monitor rynku kawy — kontrakty terminowe, prognozy i scenariusze podaży</h1>
+  <p class="sub" id="snapshot-meta">Dane kawy z sesji 21.10.2026: Coffee Board of India. Automatyczne sprawdzanie raz dziennie. Raporty ICO, USDA i prognozy zachowują własne daty publikacji.</p>
+
+  <!-- RYNEK -->
+  <section class="panel active" id="rynek">
+    <div class="card" id="market-update" style="margin-bottom:16px">
+      <h3>Aktualizacja notowań ICE i wykresów</h3>
+      <p class="small">Serwer raz dziennie sprawdza publiczną tabelę Coffee Board of India i kursy NBP. Wyświetlamy datę sesji źródłowej, która może być wcześniejsza od dnia sprawdzenia. Własne notowania i CSV zapisują się tylko w tej przeglądarce.</p>
+      <div class="row2">
+        <div class="ctrl"><label for="market-date">Data rozliczenia</label><input class="inp" id="market-date" type="date" value="2026-10-21"></div>
+        <div class="ctrl"><label for="market-contract-a">Seria arabiki (np. KCZ26)</label><input class="inp" id="market-contract-a" value="KCZ26" maxlength="24"></div>
+        <div class="ctrl"><label for="market-a">Arabica ICE (USc/lb)</label><input class="inp" id="market-a" type="number" step="0.01" min="0" value="316.15"></div>
+        <div class="ctrl"><label for="market-r">Robusta ICE (USD/t)</label><input class="inp" id="market-r" type="number" step="0.01" min="0" value="3352"></div>
+        <div class="ctrl"><label for="market-contract-r">Seria robusty (np. RCX26)</label><input class="inp" id="market-contract-r" value="RCX26" maxlength="24"></div>
+        <div class="ctrl"><label for="market-source">Źródło / notatka</label><input class="inp" id="market-source" placeholder="np. ICE / broker, settlement"></div>
+      </div>
+      <div class="presets">
+        <button class="preset" id="market-save" type="button">Zapisz notowania</button>
+        <button class="preset" id="market-export" type="button">Eksport CSV</button>
+        <button class="preset" id="market-reset" type="button">Przywróć dane początkowe</button>
+      </div>
+      <div class="ctrl"><label for="market-import">Import historii z CSV (data,arabica,robusta,seria_arabica,seria_robusta,zrodlo)</label><input class="inp" type="file" id="market-import" accept=".csv,text/csv"></div>
+      <p class="small" id="market-status" role="status">Dane kawy z 21.10.2026 — nie live.</p>
+      <p class="footnote">CSV: data w formacie RRRR-MM-DD, arabica w USc/lb, robusta w USD/t. Separator: przecinek lub średnik. Zapis lokalny nie jest synchronizowany między urządzeniami. Zmiana serii kontraktu może powodować skok ceny niezwiązany ze zmianą rynku.</p>
+    </div>
+    <div class="grid kpis">
+      <div class="card">
+        <div class="kpi-label">ICE Arabica (C)</div>
+        <div class="kpi-val num" id="market-kpi-a">316,15 <span class="kpi-unit">USc/lb</span></div>
+        <span class="chip up">Sesja 21.10.2026</span>
+        <div class="kpi-meta">KCZ26, dane z 21.10.2026, Coffee Board of India.</div>
+      </div>
+      <div class="card">
+        <div class="kpi-label">ICE Robusta (Londyn)</div>
+        <div class="kpi-val num" id="market-kpi-r">3 352 <span class="kpi-unit">USD/t</span></div>
+        <span class="chip up">Sesja 21.10.2026</span>
+        <div class="kpi-meta">RCX26, dane z 21.10.2026, Coffee Board of India.</div>
+      </div>
+      <div class="card">
+        <div class="kpi-label">Zapasy ICE — arabica</div>
+        <div class="kpi-val num">270 000 <span class="kpi-unit">worków</span></div>
+        <span class="chip up">Odczyt miesięczny ICO — wartość zaokrąglona</span>
+        <div class="kpi-meta">Koniec września 2026: 0,27 mln worków według ICO, wobec 0,24 mln w sierpniu. Nie jest to dzienny stan na 22.10.</div>
+      </div>
+      <div class="card">
+        <div class="kpi-label">Spread arabica / robusta</div>
+        <div class="kpi-val num" id="market-kpi-spread">164,1 <span class="kpi-unit">USc/lb</span></div>
+        <span class="chip neutral">Premia arabiki ≈ 107,9%</span>
+        <div class="kpi-meta">Obliczenie z cen obu kontraktów z 21.10.2026.</div>
+      </div>
+    </div>
+
+    <h2>Trend cen i historia notowań</h2>
+    <div class="presets" id="market-range"><button class="preset on" data-range="all">Cała historia</button><button class="preset" data-range="90">90 dni</button><button class="preset" data-range="30">30 dni</button></div>
+    <p class="lead">Wykres pokazuje potwierdzone rozliczenia dzienne. Średnie miesięczne ICO znajdują się w osobnej tabeli; nie są dołączane do serii dziennej.</p>
+    <div class="card">
+      <div class="chart-box"><canvas id="trend"></canvas></div><p class="footnote" id="market-chart-note">Dane historyczne z oryginalnego raportu.</p>
+    </div>
+
+    <div class="grid two" style="margin-top:16px">
+      <div class="card">
+        <h3>Średnie miesięczne ICE według ICO — 2026</h3>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>Miesiąc</th><th class="n">Arabica (USc/lb)</th><th class="n">Robusta (USc/lb)</th><th class="n">Robusta (USD/t)</th><th class="n">Spread</th></tr></thead>
+          <tbody id="tbl-prices"></tbody>
+        </table>
+        </div>
+        <p class="footnote">Źródło: ICO, raport wrzesień 2026. Wrzesień: Nowy Jork 280,68 i Londyn 154,28 USc/lb. I–VIII zachowano z pliku wejściowego (bez ponownej weryfikacji każdej obserwacji). Październik pominięto: brak pełnej średniej miesięcznej.</p>
+      </div>
+      <div class="card">
+        <h3>Zmienność 2026</h3>
+        <p class="small">We wrześniu średnie ICE spadły wobec sierpnia. Rozliczenie z 20 października jest osobną obserwacją dzienną i nie stanowi średniej za październik.</p>
+        <div class="chart-box sm"><canvas id="mom"></canvas></div>
+        <p class="footnote">Zmiana średnich miesięcznych m/m w procentach (nie w punktach procentowych). Wrzesień: arabica −10,4%, robusta −8,0%.</p>
+      </div>
+    </div>
+
+    <h2>Krzywa terminowa na 2027 rok</h2>
+    <p class="lead" id="curve-description">Potwierdzone serie z 20.10.2026: arabica XII 2026, III i V 2027 oraz robusta XI 2026, I i III 2027. Dalsze terminy pozostają bez odczytu. Robusta XI/I jest w contango; nie należy opisywać obu rynków jednym kierunkiem.</p>
+    <div class="grid two" style="margin-top:4px">
+      <div class="card">
+        <div class="chart-box sm"><canvas id="curve"></canvas></div>
+        <p class="footnote" id="curve-note">Rozliczenia z 20.10.2026, CocoaIntel. Robusta przeliczona na USc/lb; brakujące serie oznaczono jako brak danych.</p>
+      </div>
+      <div class="card">
+        <h3>Notowania serii</h3>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>Seria</th><th class="n">Arabica (USc/lb)</th><th>Seria</th><th class="n">Robusta (USD/t)</th></tr></thead>
+          <tbody id="curve-table">
+            <tr><td>XII 2026</td><td class="n">311,30</td><td>XI 2026</td><td class="n">3 410</td></tr>
+            <tr><td>III 2027</td><td class="n">299,00</td><td>I 2027</td><td class="n">3 424</td></tr>
+            <tr><td>V 2027</td><td class="n">294,30</td><td>III 2027</td><td class="n">3 411</td></tr>
+            <tr><td>VII 2027</td><td class="n">—</td><td>V 2027</td><td class="n">—</td></tr>
+            <tr><td>IX 2027</td><td class="n">—</td><td>—</td><td class="n">—</td></tr>
+          </tbody>
+        </table>
+        </div>
+        <p class="footnote">Niepełna krzywa nie jest prognozą średniej rocznej. Kalkulator uzupełnia brakujące kwartały stałą ostatnią znaną ceną — jest to założenie modelu, nie rozliczenie ICE.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROGNOZY -->
+  <section class="panel" id="prognozy">
+    <h2 style="margin-top:12px">Zestawienie prognoz: BMI, USDA i Bank Światowy</h2>
+    <p class="lead">USDA: raport lipiec 2026, potwierdzony w źródle. BMI: wartości zachowane z raportu wejściowego i potwierdzone relacją Informist; nie potwierdzono nowszej rewizji. Bank Światowy: publikacja 07.07.2026 oparta na prognozie kwietniowej.</p>
+    <div class="grid two">
+      <div class="card">
+        <h3>Bilans globalny 2026/27</h3>
+        <div class="chart-box"><canvas id="prod"></canvas></div>
+        <p class="footnote">Produkcja globalna w mln worków 60 kg — szacunki BMI i USDA FAS dla sezonu 2026/27.</p>
+      </div>
+      <div class="card">
+        <h3>Kluczowe liczby</h3>
+        <div class="table-scroll">
+        <table>
+          <tbody>
+            <tr><td>BMI — średnia cena kawy 2026</td><td class="n">307 USc/lb</td></tr>
+            <tr><td>BMI — poprzednia prognoza 2026</td><td class="n">293 USc/lb</td></tr>
+            <tr><td>BMI — produkcja 2026/27</td><td class="n">188,9 mln worków</td></tr>
+            <tr><td>BMI — nadwyżka 2026/27</td><td class="n">+14,4 mln worków</td></tr>
+            <tr><td>USDA — produkcja globalna 2026/27</td><td class="n">189,7 mln worków</td></tr>
+            <tr><td>USDA — Brazylia 2026/27</td><td class="n">71,9 mln worków</td></tr>
+            <tr><td>USDA — arabica Brazylia</td><td class="n">47,5 mln worków</td></tr>
+            <tr><td>USDA — canephora/conilon Brazylia</td><td class="n">24,4 mln worków</td></tr>
+            <tr><td>USDA — eksport globalny</td><td class="n">158,9 mln worków</td></tr>
+            <tr><td>USDA — konsumpcja globalna</td><td class="n">179,7 mln worków</td></tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h3>Kierunek cen: 2026 vs 2027</h3>
+      <div class="table-scroll">
+      <table>
+        <thead><tr><th>Instytucja</th><th>Horyzont</th><th>Arabica</th><th>Robusta</th><th>Teza</th></tr></thead>
+        <tbody>
+          <tr><td><b>BMI</b> (Fitch Solutions)</td><td>2026–2027</td><td>Średnia 2026: 307 USc/lb (rewizja w górę z 293)</td><td>Presja spadkowa przy odbudowie podaży w Azji</td><td>Ceny pozostaną wysokie do 2027 r.: niższa produkcja w Brazylii w kolejnym cyklu, ryzyko El Niño i niskie zapasy. Nadwyżka 2026/27 zawęża się w 2027/28.</td></tr>
+          <tr><td><b>USDA FAS</b></td><td>2026/27</td><td>Rekordowe zbiory arabiki w Brazylii: 47,5 mln worków</td><td>Canephora Brazylii: 24,4 mln worków</td><td>Rekordowa produkcja (+6%), rekordowy eksport i rekordowa konsumpcja — bilans fizyczny luźniejszy niż w 2025/26.</td></tr>
+          <tr><td><b>Bank Światowy</b></td><td>2026 i 2027</td><td>−14% w 2026; dalszy spadek w 2027 (bez liczby w podsumowaniu)</td><td>−18% w 2026, −3% w 2027</td><td>Normalizacja po skoku cen z 2025 r. wraz z odbudową podaży, m.in. w Kolumbii.</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p class="footnote">Pozycje BMI i USDA dotyczą różnych jednostek (ceny vs wolumeny) i nie są bezpośrednio porównywalne — tabela pokazuje kierunek tez, nie jedną wspólną prognozę.</p>
+    </div>
+  </section>
+
+  <!-- CZYNNIKI -->
+  <section class="panel" id="czynniki">
+    <h2 style="margin-top:12px">Czynniki wpływające na ceny</h2>
+    <p class="lead">Ocena siły oddziaływania i kierunku dla cen w horyzoncie 2–4 kwartałów. Skala oddziaływania jest oceną redakcyjną opartą na przytoczonych danych.</p>
+    <div class="grid drivers" id="drivers"></div>
+
+    <div class="card" style="margin-top:16px">
+      <h3>Zapasy: fizyczna poduszka rynku</h3>
+      <div class="chart-box sm"><canvas id="stocks"></canvas></div>
+      <p class="footnote">Zapasy w mln worków 60 kg, ICO: koniec września 0,27 (arabica), 0,87 (robusta). Sierpień skorygowano do 0,24 / 0,83. Czerwiec i lipiec zachowano z pliku wejściowego; nie zweryfikowano ponownie.</p>
+    </div>
+  </section>
+
+  <!-- KALKULATOR -->
+  <section class="panel" id="kalkulator">
+    <h2 style="margin-top:12px">Kalkulator scenariuszy podaży na 2027 rok</h2>
+    <p class="lead">Symuluj wpływ zmiany podaży na średnią cenę kwartalną w 2027 r. Model przenosi szok podażowy na cenę przez elastyczność popytu, z dodatkowym wzmocnieniem przy niskich zapasach.</p>
+    <div class="grid two">
+      <div class="card">
+        <h3>Założenia scenariusza</h3>
+        <div class="ctrl">
+          <label for="base">Baza cenowa na 2027</label>
+          <div class="presets" style="margin:0" id="bases">
+            <button class="preset on" data-base="fcast">Baza modelowa (BMI / ICO)</button>
+            <button class="preset" data-base="curve">Krzywa terminowa ICE</button>
+          </div>
+        </div>
+        <div class="presets">
+          <button class="preset" data-a="-10" data-r="-10">Susza El Niño (−10% / −10%)</button>
+          <button class="preset" data-a="-5" data-r="0">Słabsza Brazylia (−5% / 0%)</button>
+          <button class="preset" data-a="0" data-r="0">Scenariusz bazowy</button>
+          <button class="preset" data-a="5" data-r="10">Rekordowe zbiory (+5% / +10%)</button>
+        </div>
+        <div class="ctrl">
+          <label for="sa">Zmiana podaży arabiki <output id="sa-o">0%</output></label>
+          <input type="range" id="sa" min="-10" max="10" step="0.5" value="0" />
+        </div>
+        <div class="ctrl">
+          <label for="sr">Zmiana podaży robusty <output id="sr-o">0%</output></label>
+          <input type="range" id="sr" min="-10" max="10" step="0.5" value="0" />
+        </div>
+        <div class="ctrl">
+          <label for="el">Elastyczność cenowa popytu <output id="el-o">0,30</output></label>
+          <input type="range" id="el" min="0.15" max="0.60" step="0.01" value="0.30" />
+          <p class="small" style="margin:4px 0 0">Niższa wartość = sztywniejszy popyt = silniejsza reakcja ceny.</p>
+        </div>
+        <div class="ctrl">
+          <label for="st">Poziom zapasów ICE wobec normy <output id="st-o">25%</output></label>
+          <input type="range" id="st" min="10" max="100" step="5" value="25" />
+          <p class="small" style="margin:4px 0 0">Domyślne 25% to zaokrąglone założenie scenariusza, nie bieżący odczyt. ICO: 0,27 mln worków na koniec września. Punkt odniesienia 1 mln worków jest umowny.</p>
+        </div>
+        <p class="footnote">Wynik to symulacja edukacyjna, nie rekomendacja inwestycyjna.</p>
+      </div>
+      <div class="card">
+        <h3>Wynik: średnia cena 2027</h3>
+        <div class="res">
+          <div class="box">
+            <span class="small">Arabica, średnia roczna</span>
+            <b class="num" id="out-a">—</b>
+            <span class="small" id="out-a-d"></span>
+          </div>
+          <div class="box">
+            <span class="small">Robusta, średnia roczna</span>
+            <b class="num" id="out-r">—</b>
+            <span class="small" id="out-r-d"></span>
+          </div>
+        </div>
+        <div class="table-scroll" style="margin-top:14px">
+        <table>
+          <thead><tr><th>Kwartał 2027</th><th class="n">Arabica baza</th><th class="n">Arabica scenariusz</th><th class="n">Robusta baza</th><th class="n">Robusta scenariusz</th></tr></thead>
+          <tbody id="tbl-scen"></tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h3>Ścieżka kwartalna 2027 — baza vs scenariusz</h3>
+      <div class="chart-box"><canvas id="scen"></canvas></div>
+      <p class="footnote">
+        Baza modelowa arabiki: 307 USc/lb (BMI 2026; nie jest to prognoza BMI na 2027). Baza robusty: średnia ICE według ICO I–IX 2026 × 0,97. Korekta −3% pochodzi z prognozy Banku Światowego dla 2027; połączenie źródeł jest założeniem redakcyjnym. Wagi kwartalne są umowne. Baza terminowa: arabica III/V 2027, dalej stała cena V 2027; robusta I/III 2027, dalej stała cena III 2027. Brakujące terminy są ekstrapolacją modelową, nie cenami ICE. Transmisja szoku: Δcena% = −(Δpodaż% / elastyczność) × mnożnik zapasów, gdzie mnożnik = 1 + 0,5 × (1 − zapasy/norma).
+      </p>
+    </div>
+  </section>
+
+  <section class="panel" id="przelicznik">
+    <h2 style="margin-top:12px">Przelicznik ceny na 1 kg i złote</h2>
+    <p class="lead">Zamień notowanie giełdowe (USc/lb lub USD/t) na cenę za kilogram w dolarach i złotych. Kurs USD/PLN pobierany jest automatycznie z tabeli A Narodowego Banku Polskiego; możesz go nadpisać własnym.</p>
+    <div class="grid two even">
+      <div class="card">
+        <h3>Dane wejściowe</h3>
+        <div class="ctrl">
+          <label>Źródło ceny</label>
+          <div class="presets" style="margin:0" id="cv-src">
+            <button class="preset on" data-src="a">Arabica ICE</button>
+            <button class="preset" data-src="r">Robusta ICE</button>
+            <button class="preset" data-src="sa">Arabica — scenariusz 2027</button>
+            <button class="preset" data-src="sr">Robusta — scenariusz 2027</button>
+          </div>
+        </div>
+        <div class="ctrl">
+          <label for="cv-price">Cena</label>
+          <div class="field">
+            <input class="inp" id="cv-price" type="number" inputmode="decimal" step="0.05" min="0" />
+            <select class="sel" id="cv-unit" aria-label="Jednostka ceny">
+              <option value="clb">USc/lb</option>
+              <option value="usdt">USD/t</option>
+              <option value="usdkg">USD/kg</option>
+            </select>
+          </div>
+          <p class="small" style="margin:4px 0 0" id="cv-src-note"></p>
+        </div>
+        <div class="ctrl">
+          <label for="cv-fx">Kurs USD/PLN</label>
+          <div class="field">
+            <input class="inp" id="cv-fx" type="number" inputmode="decimal" step="0.0001" min="0" />
+            <button class="preset" id="cv-fx-reset" type="button">Kurs NBP</button>
+          </div>
+          <div class="fx-status" id="cv-fx-status">Pobieranie kursu NBP…</div>
+        </div>
+        <div class="row2">
+          <div class="ctrl">
+            <label for="cv-prem">Premia / dyskonto do giełdy</label>
+            <div class="field">
+              <input class="inp" id="cv-prem" type="number" inputmode="decimal" step="1" value="0" />
+              <select class="sel" id="cv-prem-unit" aria-label="Jednostka premii">
+                <option value="clb">USc/lb</option>
+                <option value="usdt">USD/t</option>
+                <option value="plnkg">PLN/kg</option>
+              </select>
+            </div>
+            <p class="small" style="margin:4px 0 0">Wartość dodatnia = premia, ujemna = dyskonto.</p>
+          </div>
+          <div class="ctrl">
+            <label for="cv-loss">Ubytek przy paleniu <output id="cv-loss-o">18%</output></label>
+            <input type="range" id="cv-loss" min="10" max="25" step="1" value="18" />
+          </div>
+        </div>
+        <p class="footnote">Premia (tzw. dyferencjał) to różnica między ceną fizycznego surowca a kontraktem — zależy od pochodzenia, jakości i frachtu; w handlu podaje się ją zwykle w USc/lb, np. +25 USc/lb. Ubytek przy paleniu to utrata masy przy przejściu z kawy zielonej na paloną — typowo 15–20%. Koszty frachtu, cła i logistyki doliczysz w sekcji „Koszt z dostawą do magazynu” poniżej.</p>
+      </div>
+      <div class="card">
+        <h3>Wynik</h3>
+        <div class="res three">
+          <div class="box hl">
+            <span class="small">Kawa zielona, 1 kg</span>
+            <b class="num" id="cv-pln-kg">—</b>
+            <span class="small" id="cv-usd-kg"></span>
+          </div>
+          <div class="box">
+            <span class="small">Ekwiwalent kawy palonej, 1 kg</span>
+            <b class="num" id="cv-pln-roast">—</b>
+            <span class="small" id="cv-roast-note"></span>
+          </div>
+          <div class="box">
+            <span class="small">Worek 60 kg</span>
+            <b class="num" id="cv-pln-bag">—</b>
+            <span class="small" id="cv-usd-bag"></span>
+          </div>
+          <div class="box">
+            <span class="small">1 tona</span>
+            <b class="num" id="cv-pln-t">—</b>
+            <span class="small" id="cv-usd-t"></span>
+          </div>
+        </div>
+        <h3 style="margin-top:18px">Zestawienie bieżących notowań</h3>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>Surowiec</th><th class="n">USD/kg</th><th class="n">PLN/kg</th><th class="n">PLN / worek 60 kg</th><th class="n">PLN/t</th></tr></thead>
+          <tbody id="cv-tbl"></tbody>
+        </table>
+        </div>
+        <p class="footnote" id="cv-foot"></p>
+      </div>
+    </div>
+
+    <h2 style="margin-top:28px">Koszt z dostawą do magazynu</h2>
+    <p class="lead">Cena z przelicznika powyżej (giełda ± premia) traktowana jest jako cena FOB w porcie załadunku. Dolicz fracht morski, ubezpieczenie, opłaty portowe, odprawę celną, cło i transport drogowy, aby otrzymać koszt kawy zielonej w Twoim magazynie.</p>
+    <div class="grid two even">
+      <div class="card">
+        <h3>Logistyka i opłaty</h3>
+        <div class="row2">
+          <div class="ctrl">
+            <label for="lc-cont">Liczba kontenerów</label>
+            <input class="inp" id="lc-cont" type="number" inputmode="numeric" step="1" min="1" value="1" />
+          </div>
+          <div class="ctrl">
+            <label for="lc-bags">Worków 60 kg w kontenerze</label>
+            <input class="inp" id="lc-bags" type="number" inputmode="numeric" step="1" min="1" value="320" />
+          </div>
+        </div>
+        <div class="ctrl">
+          <label for="lc-frt">Fracht morski (port załadunku → port docelowy, np. Hamburg)</label>
+          <div class="field">
+            <input class="inp" id="lc-frt" type="number" inputmode="decimal" step="0.5" min="0" value="2263.50" />
+            <select class="sel" id="lc-frt-unit" aria-label="Jednostka frachtu">
+              <option value="usdc">USD/kontener</option>
+              <option value="usdt">USD/t</option>
+              <option value="plnc">PLN/kontener</option>
+            </select>
+          </div>
+        </div>
+        <div class="ctrl">
+          <label for="lc-ins">Ubezpieczenie cargo</label>
+          <div class="field">
+            <input class="inp" id="lc-ins" type="number" inputmode="decimal" step="0.05" min="0" value="0.3" />
+            <select class="sel" id="lc-ins-unit" aria-label="Jednostka ubezpieczenia">
+              <option value="pct">% (FOB + fracht)</option>
+              <option value="pln">PLN za dostawę</option>
+            </select>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="ctrl">
+            <label for="lc-port">Opłaty portowe, THC, rozładunek</label>
+            <div class="field">
+              <input class="inp" id="lc-port" type="number" inputmode="decimal" step="10" min="0" value="0" placeholder="wpisz kwotę" />
+              <select class="sel" id="lc-port-cur" aria-label="Waluta">
+                <option value="pln">PLN/kont.</option>
+                <option value="eur">EUR/kont.</option>
+              </select>
+            </div>
+          </div>
+          <div class="ctrl">
+            <label for="lc-road">Transport Hamburg → Zbuczyn</label>
+            <div class="field">
+              <input class="inp" id="lc-road" type="number" inputmode="decimal" step="10" min="0" value="0" placeholder="wpisz kwotę" />
+              <select class="sel" id="lc-road-cur" aria-label="Waluta">
+                <option value="pln">PLN/kont.</option>
+                <option value="eur">EUR/kont.</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="ctrl">
+            <label for="lc-clr">Odprawa celna (agencja)</label>
+            <div class="field">
+              <input class="inp" id="lc-clr" type="number" inputmode="decimal" step="10" min="0" value="0" placeholder="wpisz kwotę" />
+              <select class="sel" id="lc-clr-cur" aria-label="Waluta">
+                <option value="pln">PLN/dostawa</option>
+                <option value="eur">EUR/dostawa</option>
+              </select>
+            </div>
+          </div>
+          <div class="ctrl">
+            <label for="lc-oth">Inne (kontrola, magazyn, bankowe)</label>
+            <div class="field">
+              <input class="inp" id="lc-oth" type="number" inputmode="decimal" step="10" min="0" value="0" />
+              <select class="sel" id="lc-oth-cur" aria-label="Waluta">
+                <option value="pln">PLN/dostawa</option>
+                <option value="eur">EUR/dostawa</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="row2">
+          <div class="ctrl">
+            <label for="lc-duty">Cło</label>
+            <div class="field">
+              <input class="inp" id="lc-duty" type="number" inputmode="decimal" step="0.1" min="0" value="0" />
+              <span class="sel" aria-hidden="true">% wartości celnej</span>
+            </div>
+          </div>
+          <div class="ctrl">
+            <label for="lc-vat">VAT z importu</label>
+            <div class="field">
+              <input class="inp" id="lc-vat" type="number" inputmode="decimal" step="1" min="0" value="23" />
+              <span class="sel" aria-hidden="true">%</span>
+            </div>
+          </div>
+        </div>
+        <p class="footnote">Fracht 2 263,50 USD/kontener i ubezpieczenie 0,3% zachowano jako założenia użytkownika, bez aktualnej oferty przewoźnika; opłaty portowe, odprawę i transport drogowy wpisz, gdy poznasz stawki (pola z zerem wynik pomija i oznacza jako brakujące). Kwoty w EUR przeliczane są kursem średnim NBP <span id="lc-eur-st"></span>. Kawa zielona niepalona (CN 0901 11 00) jest w UE <a href="https://eur-lex.europa.eu/legal-content/PL/TXT/HTML/?uri=OJ:L:2021:414:FULL" target="_blank" rel="noopener">bez cła</a>; kawa palona ma inną stawkę. VAT ustawiono roboczo na stawkę podstawową 23%; właściwą stawkę dla konkretnego towaru i możliwość odliczenia należy potwierdzić według klasyfikacji CN/WIS. Nie potwierdzono wcześniejszego założenia 8%. VAT z importu pokazujemy osobno. Wartość celna = FOB + fracht + ubezpieczenie (CIF). Kwoty w USD przeliczane są kursem z przelicznika powyżej.</p>
+      </div>
+      <div class="card">
+        <h3>Koszt w magazynie</h3>
+        <div class="res three">
+          <div class="box hl">
+            <span class="small">Kawa zielona w magazynie, 1 kg</span>
+            <b class="num" id="lc-kg">—</b>
+            <span class="small" id="lc-kg-note"></span>
+          </div>
+          <div class="box">
+            <span class="small">Ekwiwalent kawy palonej, 1 kg</span>
+            <b class="num" id="lc-roast">—</b>
+            <span class="small" id="lc-roast-note"></span>
+          </div>
+          <div class="box">
+            <span class="small">Worek 60 kg</span>
+            <b class="num" id="lc-bag">—</b>
+            <span class="small" id="lc-bag-note"></span>
+          </div>
+          <div class="box">
+            <span class="small">Cała dostawa</span>
+            <b class="num" id="lc-tot">—</b>
+            <span class="small" id="lc-tot-note"></span>
+          </div>
+        </div>
+        <h3 style="margin-top:18px">Struktura kosztu</h3>
+        <div class="table-scroll">
+        <table>
+          <thead><tr><th>Pozycja</th><th class="n">PLN / dostawa</th><th class="n">PLN/kg</th><th class="n">Udział</th></tr></thead>
+          <tbody id="lc-tbl"></tbody>
+        </table>
+        </div>
+        <p class="footnote" id="lc-foot"></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  <p><b>Dane dzienne:</b> <a href="https://coffeeboard.gov.in/">Coffee Board of India — publiczna tabela Futures Price</a>. Harmonogram sprawdza źródło raz dziennie. W razie błędu zachowuje ostatni prawidłowy odczyt. Nie gwarantujemy publikacji źródła w określonej godzinie.</p>
+  <p><b>Archiwalne źródła: weryfikacja 22.10.2026.</b> Ceny i niepełna krzywa: <a href="https://www.cocoaintel.com/coffee-pulls-back-as-london-moves-into-a-nearby-discount-20-october-2026/">CocoaIntel, sesja 20.10</a>. Raport StoneX z 21.10 jest dostępny, ale jego tabele nie dały się odczytać — nie przypisano cen z 20.10 do nowszej sesji.</p>
+  <p>Średnie i zapasy: <a href="https://ico.org/documents/cy2025-26/cmr-0926-e.pdf">ICO, wrzesień 2026</a>. Bilans: <a href="https://apps.fas.usda.gov/psdonline/circulars/coffee.pdf">USDA FAS, lipiec 2026</a>. BMI: <a href="https://informistmedia.com/CommodityWire/58995/costly-brew-BMI-lifts-coffee-price-forecast-amid-tight-stocks-El-Nino-risks-in-Asia">relacja Informist</a>; brak potwierdzonej nowszej rewizji. Ceny prognozowane: <a href="https://blogs.worldbank.org/en/opendata/beverage-prices-retreat-as-supplies-recover">Bank Światowy, 07.07.2026</a>. Pogoda: <a href="https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso_advisory/ensodisc.shtml">NOAA/CPC, 08.10.2026</a>.</p>
+  <p>Kursy awaryjne: USD 3,8886, EUR 4,3685 PLN, 22.10.2026, tabela 206/A/NBP/2026 — <a href="https://azfinanse.mybank.pl/kursy-walut/">publikacja kursów NBP</a>. Bezpośredni odczyt archiwum NBP nie był dostępny podczas aktualizacji; aplikacja nadal próbuje pobrać kursy bezpośrednio z API NBP przy otwarciu. <a href="https://www.biznes.gov.pl/pl/portal/00232">Podstawowa stawka VAT</a>. Koszty logistyki i parametry modelu są założeniami, nie notowaniami rynkowymi.</p>
+  <p>Pulpit ma charakter informacyjny. Ceny kontraktów terminowych zmieniają się w ciągu dnia; przed decyzjami handlowymi zweryfikuj bieżące notowania.</p>
+</footer>
+
+<script>
+const MARKET_SNAPSHOT = {"lastAttemptAt": "2026-10-22T21:29:34+00:00", "errors": [], "latest": {"date": "2026-10-21", "arabica": 316.15, "robusta": 3352.0, "contractA": "KCZ26", "contractR": "RCX26", "source": "Coffee Board of India — Futures Price", "sourceUrl": "https://coffeeboard.gov.in/"}, "curve": {"date": "2026-10-21", "arabica": [{"delivery": "2026-12", "label": "Dec-2026", "contract": "KCZ26", "price": 316.15}, {"delivery": "2027-03", "label": "Mar-2027", "contract": "KCH27", "price": 301.25}, {"delivery": "2027-05", "label": "May-2027", "contract": "KCK27", "price": 296.2}], "robusta": [{"delivery": "2026-11", "label": "Nov-2026", "contract": "RCX26", "price": 3352.0}, {"delivery": "2027-01", "label": "Jan-2027", "contract": "RCF27", "price": 3364.0}, {"delivery": "2027-03", "label": "Mar-2027", "contract": "RCH27", "price": 3344.0}]}, "history": [{"date": "2026-10-21", "arabica": 316.15, "robusta": 3352.0, "contractA": "KCZ26", "contractR": "RCX26", "source": "Coffee Board of India — Futures Price", "sourceUrl": "https://coffeeboard.gov.in/"}], "lastSuccessAt": "2026-10-22T21:29:34+00:00", "fx": {"usd": {"rate": 3.8886, "date": "2026-10-22", "no": "206/A/NBP/2026", "source": "NBP tabela A"}, "eur": {"rate": 4.3685, "date": "2026-10-22", "no": "206/A/NBP/2026", "source": "NBP tabela A"}}, "schemaVersion": 1};
+const T = {
+  months: ['Sty','Lut','Mar','Kwi','Maj','Cze','Lip','Sie','Wrz'],
+  arabica: [334.99,288.76,290.18,284.63,268.18,256.75,310.34,313.20,280.68],
+  robustaC:[180.23,166.06,161.91,150.65,151.79,155.90,172.73,167.63,154.28],
+  stocksNY:[0.29,0.29,0.24,0.27],
+  stocksLD:[0.68,0.69,0.83,0.87]
+};
+const LB_T = 2204.62;
+
+/* ---------- theme ---------- */
+const root = document.documentElement;
+root.dataset.theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+document.getElementById('theme').onclick = () => {
+  root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+  Object.values(charts).forEach(c => { applyTheme(c); c.update(); });
+};
+const cssv = n => getComputedStyle(root).getPropertyValue(n).trim();
+
+/* ---------- tabs ---------- */
+document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
+  document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', x === t));
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === t.dataset.panel));
+  window.scrollTo({top:0,behavior:'smooth'});
+  Object.values(charts).forEach(c => c.resize());
+});
+
+/* ---------- tables ---------- */
+const fmt = (v,d=1) => v==null ? '—' : v.toLocaleString('pl-PL',{minimumFractionDigits:d,maximumFractionDigits:d});
+document.getElementById('tbl-prices').innerHTML = T.months.map((m,i)=>`
+  <tr><td>${m} 2026${i===8?' <span class="small">(średnia)</span>':''}</td>
+  <td class="n">${fmt(T.arabica[i],2)}</td>
+  <td class="n">${fmt(T.robustaC[i],2)}</td>
+  <td class="n">${fmt(T.robustaC[i]*LB_T/100,0)}</td>
+  <td class="n">${fmt(T.arabica[i]-T.robustaC[i],1)}</td></tr>`).join('');
+
+/* ---------- drivers ---------- */
+const drivers = [
+  {t:'Produkcja w Brazylii', d:'USDA (lipiec 2026): 71,9 mln worków w sezonie 2026/27, w tym arabica 47,5 mln i robusta 24,4 mln. Są to prognozy sezonowe, nie nowe odczyty z października.', k:'Spadkowy', w:90, c:'var(--robusta)', s:'Silne oddziaływanie'},
+  {t:'Ryzyko El Niño', d:'NOAA/CPC, komunikat 08.10.2026: silne lub bardzo silne El Niño prawdopodobne do I–III 2027 (ponad 83%). Oddziaływanie na konkretny zbiór kawy pozostaje niepewne.', k:'Wzrostowy', w:80, c:'var(--warn)', s:'Silne, ale warunkowe'},
+  {t:'Zapasy certyfikowane', d:'ICO: koniec września 0,27 mln worków arabiki i 0,87 mln robusty. To zaokrąglone wartości miesięczne; nie potwierdzono dziennego stanu na 22.10.2026.', k:'Wzrostowy', w:70, c:'var(--warn)', s:'Silne, ale słabnące'},
+  {t:'Cykl dwuletni arabiki', d:'Rok 2027/28 może przynieść słabszy cykl brazylijskiej arabiki. Wartości BMI 188,9 mln produkcji i 14,4 mln nadwyżki na 2026/27 pozostają historyczną prognozą, bez potwierdzonej nowszej rewizji.', k:'Wzrostowy', w:70, c:'var(--warn)', s:'Umiarkowane–silne'},
+  {t:'Popyt i konsumpcja', d:'USDA (lipiec 2026): konsumpcja 179,7 mln worków, eksport wszystkich form 158,9 mln. Różnica produkcja minus konsumpcja wynosi około 10 mln worków; to inny bilans niż nadwyżka BMI.', k:'Wzrostowy', w:55, c:'var(--brand-2)', s:'Umiarkowane'},
+  {t:'Podaż robusty z Azji', d:'USDA: Wietnam 32,5 mln worków w 2026/27, ale Indonezja 11,4 mln (spadek o 1 mln). Odbudowa podaży nie obejmuje całej Azji. Bank Światowy (07.07): robusta −18% w 2026 i −3% w 2027.', k:'Spadkowy', w:65, c:'var(--robusta)', s:'Umiarkowane'}
+];
+document.getElementById('drivers').innerHTML = drivers.map(d=>`
+  <div class="card">
+    <div class="driver-head"><h3 style="margin:0">${d.t}</h3>
+      <span class="chip ${d.k==='Wzrostowy'?'down':'up'}">${d.k==='Wzrostowy'?'▲':'▼'} ${d.k}</span></div>
+    <div class="bar"><i style="width:${d.w}%;background:${d.c}"></i></div>
+    <div class="small" style="margin-bottom:8px"><b>${d.s}</b></div>
+    <p class="small" style="margin:0">${d.d}</p>
+  </div>`).join('');
+
+/* ---------- charts ---------- */
+const charts = {};
+function applyTheme(c){
+  const grid = cssv('--divider'), txt = cssv('--muted');
+  if (c.options.scales) Object.values(c.options.scales).forEach(s => {
+    if (s.grid) s.grid.color = grid;
+    if (s.ticks) s.ticks.color = txt;
+    if (s.title) s.title.color = txt;
+  });
+  if (c.options.plugins?.legend?.labels) c.options.plugins.legend.labels.color = txt;
+}
+const baseOpts = () => ({
+  responsive:true, maintainAspectRatio:false,
+  interaction:{mode:'index',intersect:false},
+  plugins:{legend:{labels:{color:cssv('--muted'),usePointStyle:true,boxWidth:8}}},
+});
+
+charts.trend = new Chart(document.getElementById('trend'), {
+  type:'line',
+  data:{labels:T.months.map(m=>m+' 26'),datasets:[
+    {label:'Arabica (USc/lb)',data:T.arabica,borderColor:cssv('--arabica'),backgroundColor:'rgba(168,85,31,.12)',borderWidth:2.5,tension:.32,fill:true,pointRadius:3},
+    {label:'Robusta (USc/lb)',data:T.robustaC,borderColor:cssv('--robusta'),backgroundColor:'rgba(63,111,74,.10)',borderWidth:2.5,tension:.32,fill:true,pointRadius:3}
+  ]},
+  options:{...baseOpts(),scales:{
+    y:{grid:{color:cssv('--divider')},ticks:{color:cssv('--muted'),callback:v=>v+' c'},title:{display:true,text:'USc/lb',color:cssv('--muted')}},
+    x:{grid:{display:false},ticks:{color:cssv('--muted')}}}}
+});
+
+const mom = k => T[k].map((v,i)=> i===0?null:(v/T[k][i-1]-1)*100);
+charts.mom = new Chart(document.getElementById('mom'), {
+  type:'bar',
+  data:{labels:T.months.slice(1).map(m=>m+' 26'),datasets:[
+    {label:'Arabica',data:mom('arabica').slice(1),backgroundColor:cssv('--arabica'),borderRadius:4},
+    {label:'Robusta',data:mom('robustaC').slice(1),backgroundColor:cssv('--robusta'),borderRadius:4}
+  ]},
+  options:{...baseOpts(),scales:{
+    y:{grid:{color:cssv('--divider')},ticks:{color:cssv('--muted'),callback:v=>v.toFixed(0)+'%'}},
+    x:{grid:{display:false},ticks:{color:cssv('--muted')}}}}
+});
+
+charts.prod = new Chart(document.getElementById('prod'), {
+  type:'bar',
+  data:{labels:['Produkcja globalna 2026/27','Konsumpcja globalna','Eksport globalny','Brazylia — razem','Brazylia — arabica','Brazylia — canephora'],
+    datasets:[
+      {label:'BMI',data:[188.9,null,null,null,null,null],backgroundColor:cssv('--brand-2'),borderRadius:4},
+      {label:'USDA FAS',data:[189.7,179.7,158.9,71.9,47.5,24.4],backgroundColor:cssv('--robusta'),borderRadius:4}
+    ]},
+  options:{...baseOpts(),indexAxis:'y',scales:{
+    x:{grid:{color:cssv('--divider')},ticks:{color:cssv('--muted')},title:{display:true,text:'mln worków 60 kg',color:cssv('--muted')}},
+    y:{grid:{display:false},ticks:{color:cssv('--muted')}}}}
+});
+
+charts.stocks = new Chart(document.getElementById('stocks'), {
+  type:'line',
+  data:{labels:['Cze 26','Lip 26','Sie 26','Wrz 26'],datasets:[
+    {label:'ICE Nowy Jork — arabica',data:[0.29,0.29,0.24,0.27],borderColor:cssv('--arabica'),backgroundColor:'rgba(168,85,31,.12)',borderWidth:2.5,tension:.25,pointRadius:4,fill:true},
+    {label:'ICE Londyn — robusta',data:[0.68,0.69,0.83,0.87],borderColor:cssv('--robusta'),borderWidth:2.5,tension:.25,pointRadius:4,spanGaps:false}
+  ]},
+  options:{...baseOpts(),scales:{
+    y:{grid:{color:cssv('--divider')},ticks:{color:cssv('--muted')},title:{display:true,text:'mln worków 60 kg',color:cssv('--muted')},beginAtZero:true},
+    x:{grid:{display:false},ticks:{color:cssv('--muted')}}}}
+});
+
+charts.curve = new Chart(document.getElementById('curve'), {
+  type:'line',
+  data:{labels:['XII 26 / XI 26','III 27 / I 27','V 27 / III 27','VII 27 / V 27','IX 27'],datasets:[
+    {label:'Arabica (USc/lb)',data:[311.30,299.00,294.30,null,null],borderColor:cssv('--arabica'),backgroundColor:'rgba(168,85,31,.12)',borderWidth:2.5,tension:.2,pointRadius:4,fill:true},
+    {label:'Robusta (USc/lb)',data:[3410,3424,3411,null,null].map(v=>v===null?null:v/22.0462),borderColor:cssv('--robusta'),borderWidth:2.5,tension:.2,pointRadius:4}
+  ]},
+  options:{...baseOpts(),scales:{
+    y:{grid:{color:cssv('--divider')},ticks:{color:cssv('--muted'),callback:v=>v+' c'},title:{display:true,text:'USc/lb',color:cssv('--muted')}},
+    x:{grid:{display:false},ticks:{color:cssv('--muted')}}}}
+});
+
+/* ---------- calculator ---------- */
+const BASE_A = 307;          // Model reference, BMI 2026; no asserted 2027 forecast
+const BASE_R = T.robustaC.reduce((a,b)=>a+b,0)/T.robustaC.length * 0.97;     // ICE monthly Jan-Sep average, model adjustment -3%
+const WA = [1.03,1.00,0.98,0.99], WR = [1.02,1.00,0.99,0.99];
+const Q = ['Q1 2027','Q2 2027','Q3 2027','Q4 2027'];
+const CURVE_A = [299.00,294.30,294.30,294.30];            // III/V 2027, last observed price carried into Q3/Q4
+const CURVE_R = [3424,3411,3411,3411].map(v=>v/22.0462*1); // I/III 2027, last observed price carried into Q3/Q4
+let baseMode = 'fcast';
+
+const el = id => document.getElementById(id);
+function scenario(){
+  const sa=+el('sa').value, sr=+el('sr').value, e=+el('el').value, st=+el('st').value/100;
+  const mult = 1 + 0.5*(1-st);
+  const da = -(sa/100)/e*mult, dr = -(sr/100)/e*mult;
+  const baseA = baseMode==='curve' ? CURVE_A.slice() : WA.map(w=>BASE_A*w);
+  const baseR = baseMode==='curve' ? CURVE_R.slice() : WR.map(w=>BASE_R*w);
+  return {sa,sr,e,st,mult,da,dr,baseA,baseR,
+    scA:baseA.map(v=>v*(1+da)), scR:baseR.map(v=>v*(1+dr))};
+}
+function render(){
+  const s = scenario();
+  el('sa-o').textContent = (s.sa>0?'+':'')+s.sa.toLocaleString('pl-PL')+'%';
+  el('sr-o').textContent = (s.sr>0?'+':'')+s.sr.toLocaleString('pl-PL')+'%';
+  el('el-o').textContent = s.e.toLocaleString('pl-PL',{minimumFractionDigits:2});
+  el('st-o').textContent = Math.round(s.st*100)+'%';
+  const avg = a => a.reduce((x,y)=>x+y,0)/a.length;
+  const aAvg=avg(s.scA), rAvg=avg(s.scR), aB=avg(s.baseA), rB=avg(s.baseR);
+  el('out-a').textContent = fmt(aAvg,1)+' USc/lb';
+  el('out-r').textContent = fmt(rAvg*LB_T/100,0)+' USD/t';
+  const sign = v => (v>=0?'+':'')+fmt(v,1)+'%';
+  el('out-a-d').textContent = `baza ${fmt(aB,1)} · ${sign((aAvg/aB-1)*100)}`;
+  el('out-r-d').textContent = `baza ${fmt(rB*LB_T/100,0)} USD/t · ${sign((rAvg/rB-1)*100)} (${fmt(rAvg,1)} USc/lb)`;
+  el('tbl-scen').innerHTML = Q.map((q,i)=>`<tr><td>${q}</td>
+    <td class="n">${fmt(s.baseA[i],1)}</td><td class="n"><b>${fmt(s.scA[i],1)}</b></td>
+    <td class="n">${fmt(s.baseR[i]*LB_T/100,0)}</td><td class="n"><b>${fmt(s.scR[i]*LB_T/100,0)}</b></td></tr>`).join('');
+  if(charts.scen){
+    charts.scen.data.datasets[0].data=s.baseA; charts.scen.data.datasets[1].data=s.scA;
+    charts.scen.data.datasets[2].data=s.baseR; charts.scen.data.datasets[3].data=s.scR;
+    charts.scen.update();
+  }
+  if(window.__cvHook) window.__cvHook();
+}
+charts.scen = new Chart(document.getElementById('scen'), {
+  type:'line',
+  data:{labels:Q,datasets:[
+    {label:'Arabica — baza',data:[],borderColor:cssv('--arabica'),borderDash:[6,4],borderWidth:2,tension:.25,pointRadius:3},
+    {label:'Arabica — scenariusz',data:[],borderColor:cssv('--arabica'),backgroundColor:'rgba(168,85,31,.12)',borderWidth:3,tension:.25,fill:false,pointRadius:4},
+    {label:'Robusta — baza',data:[],borderColor:cssv('--robusta'),borderDash:[6,4],borderWidth:2,tension:.25,pointRadius:3},
+    {label:'Robusta — scenariusz',data:[],borderColor:cssv('--robusta'),borderWidth:3,tension:.25,pointRadius:4}
+  ]},
+  options:{...baseOpts(),scales:{
+    y:{grid:{color:cssv('--divider')},ticks:{color:cssv('--muted'),callback:v=>v+' c'},title:{display:true,text:'USc/lb',color:cssv('--muted')}},
+    x:{grid:{display:false},ticks:{color:cssv('--muted')}}}}
+});
+['sa','sr','el','st'].forEach(id => el(id).addEventListener('input', () => {
+  document.querySelectorAll('.preset[data-a]').forEach(x=>x.classList.remove('on')); render();
+}));
+document.querySelectorAll('#bases .preset').forEach(b => b.onclick = () => {
+  baseMode = b.dataset.base;
+  document.querySelectorAll('#bases .preset').forEach(x=>x.classList.toggle('on', x===b));
+  render();
+});
+document.querySelectorAll('.preset[data-a]').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.preset[data-a]').forEach(x=>x.classList.toggle('on', x===b));
+  el('sa').value=b.dataset.a; el('sr').value=b.dataset.r; render();
+});
+render();
+
+/* ---------- przelicznik PLN/kg ---------- */
+const SPOT = { a: MARKET_SNAPSHOT.latest.arabica, r: MARKET_SNAPSHOT.latest.robusta, date: MARKET_SNAPSHOT.latest.date.split('-').reverse().join('.'), contractA: MARKET_SNAPSHOT.latest.contractA, contractR: MARKET_SNAPSHOT.latest.contractR };   // ostatnie rozliczenia ICE: arabica USc/lb, robusta USD/t
+const FX_FALLBACK = { ...MARKET_SNAPSHOT.fx.usd };
+const KG_LB = 2.20462;
+let fxNbp = { ...FX_FALLBACK, live:false };
+let cvSrc = 'a';
+const toUsdKg = (v,u) => u==='clb' ? v/100*KG_LB : u==='usdt' ? v/1000 : v;
+const pl = (v,d=2) => v.toLocaleString('pl-PL',{minimumFractionDigits:d,maximumFractionDigits:d});
+function scenAvg(){
+  const s = scenario(); const avg = a => a.reduce((x,y)=>x+y,0)/a.length;
+  return { a: avg(s.scA), r: avg(s.scR)*LB_T/100 };
+}
+function setSource(src){
+  cvSrc = src;
+  document.querySelectorAll('#cv-src .preset').forEach(x=>x.classList.toggle('on', x.dataset.src===src));
+  const sc = scenAvg();
+  const map = {
+    a:  [SPOT.a, 'clb', `Kontrakt ${SPOT.contractA}, data notowań ${SPOT.date}.`],
+    r:  [SPOT.r, 'usdt', `Kontrakt ${SPOT.contractR}, data notowań ${SPOT.rDate||SPOT.date}.`],
+    sa: [Math.round(sc.a*100)/100, 'clb', 'Średnia 2027 z bieżących ustawień kalkulatora scenariuszy.'],
+    sr: [Math.round(sc.r), 'usdt', 'Średnia 2027 z bieżących ustawień kalkulatora scenariuszy.'],
+  }[src];
+  el('cv-price').value = map[0]; el('cv-unit').value = map[1]; el('cv-src-note').textContent = map[2];
+  convert();
+}
+function convert(){
+  const price = parseFloat(el('cv-price').value), fx = parseFloat(el('cv-fx').value);
+  const prem = parseFloat(el('cv-prem').value) || 0, premU = el('cv-prem-unit').value, loss = +el('cv-loss').value;
+  el('cv-loss-o').textContent = loss+'%';
+  const ok = isFinite(price) && price>0 && isFinite(fx) && fx>0;
+  const ids = ['cv-pln-kg','cv-pln-roast','cv-pln-bag','cv-pln-t'];
+  if(!ok){ fobState=null; if(window.landed) landed(); ids.forEach(i=>el(i).textContent='—'); ['cv-usd-kg','cv-roast-note','cv-usd-bag','cv-usd-t'].forEach(i=>el(i).textContent='Wpisz cenę i kurs większe od zera'); return; }
+  const premUsdKg = premU==='plnkg' ? prem/fx : toUsdKg(prem, premU);
+  const usdKg = toUsdKg(price, el('cv-unit').value) + premUsdKg;
+  const plnKg = usdKg*fx, roast = plnKg/(1-loss/100);
+  if(usdKg<=0){ fobState=null; if(window.landed) landed(); ids.forEach(i=>el(i).textContent='—'); ['cv-usd-kg','cv-roast-note','cv-usd-bag','cv-usd-t'].forEach(i=>el(i).textContent='Dyskonto przewyższa cenę'); return; }
+  el('cv-pln-kg').textContent = pl(plnKg)+' zł';
+  el('cv-usd-kg').textContent = pl(usdKg,3)+' USD/kg' + (prem ? ` · w tym ${premUsdKg>0?'premia +':'dyskonto −'}${pl(Math.abs(premUsdKg*fx))} zł/kg` : '');
+  el('cv-pln-roast').textContent = pl(roast)+' zł';
+  el('cv-roast-note').textContent = `surowiec potrzebny na 1 kg palonej (${pl(1/(1-loss/100),2)} kg zielonej)`;
+  el('cv-pln-bag').textContent = pl(plnKg*60,0)+' zł';
+  el('cv-usd-bag').textContent = pl(usdKg*60,0)+' USD';
+  el('cv-pln-t').textContent = pl(plnKg*1000,0)+' zł';
+  el('cv-usd-t').textContent = pl(usdKg*1000,0)+' USD';
+  const rows = [['Arabica ICE ('+SPOT.contractA+')', toUsdKg(SPOT.a,'clb')], ['Robusta ICE ('+SPOT.contractR+')', toUsdKg(SPOT.r,'usdt')]];
+  el('cv-tbl').innerHTML = rows.map(([n,u])=>`<tr><td>${n}</td><td class="n">${pl(u,3)}</td><td class="n"><b>${pl(u*fx)}</b></td><td class="n">${pl(u*fx*60,0)}</td><td class="n">${pl(u*fx*1000,0)}</td></tr>`).join('');
+  fobState = {usdKg, fx, loss}; if(typeof landed==='function') landed();
+  el('cv-foot').textContent = `Tabela: ceny giełdowe bez premii, arabica z ${SPOT.date}, robusta z ${SPOT.rDate||SPOT.date}, kurs ${pl(fx,4)} PLN/USD. 1 lb = 0,453592 kg; 1 USc/lb = 0,0220462 USD/kg.`;
+}
+function fxStatus(){
+  const st = el('cv-fx-status');
+  const d = fxNbp.date.split('-').reverse().join('.');
+  st.className = 'fx-status' + (fxNbp.live ? ' ok' : '');
+  st.textContent = fxNbp.live ? `Kurs średni NBP z ${d} (tabela ${fxNbp.no}).` : `Nie udało się pobrać bieżącego kursu — użyto kursu NBP z ${d} (tabela ${fxNbp.no}).`;
+}
+el('cv-fx').value = FX_FALLBACK.rate;
+fetch('https://api.nbp.pl/api/exchangerates/rates/a/usd/?format=json', {headers:{Accept:'application/json'}})
+  .then(r => r.ok ? r.json() : Promise.reject())
+  .then(j => { const x=j.rates[0]; fxNbp={rate:x.mid,date:x.effectiveDate,no:x.no,live:true}; el('cv-fx').value=x.mid; fxStatus(); convert(); })
+  .catch(() => { fxStatus(); });
+fxStatus();
+document.querySelectorAll('#cv-src .preset').forEach(b => b.onclick = () => setSource(b.dataset.src));
+['cv-price','cv-fx','cv-prem','cv-loss'].forEach(id => el(id).addEventListener('input', () => {
+  if(id==='cv-price') document.querySelectorAll('#cv-src .preset').forEach(x=>x.classList.remove('on'));
+  convert();
+}));
+el('cv-prem-unit').addEventListener('change', convert);
+el('cv-unit').addEventListener('change', () => { document.querySelectorAll('#cv-src .preset').forEach(x=>x.classList.remove('on')); convert(); });
+el('cv-fx-reset').onclick = () => { el('cv-fx').value = fxNbp.rate; convert(); };
+
+/* ---------- koszt z dostawą do magazynu ---------- */
+let fobState = null;
+const EUR_FALLBACK = { ...MARKET_SNAPSHOT.fx.eur };
+let eurNbp = { ...EUR_FALLBACK, live:false };
+const cur = (id) => num(id) * (el(id+'-cur').value==='eur' ? eurNbp.rate : 1);
+function eurSt(){ el('lc-eur-st').textContent = `(${pl(eurNbp.rate,4)} PLN/EUR, ${eurNbp.date.split('-').reverse().join('.')}, tabela ${eurNbp.no})`; }
+fetch('https://api.nbp.pl/api/exchangerates/rates/a/eur/?format=json',{headers:{Accept:'application/json'}}).then(r=>r.ok?r.json():Promise.reject()).then(j=>{const x=j.rates[0]; eurNbp={rate:x.mid,date:x.effectiveDate,no:x.no,live:true}; eurSt(); landed();}).catch(()=>{});
+const num = id => { const v = parseFloat(el(id).value); return isFinite(v) && v>0 ? v : 0; };
+function landed(){
+  const out = ['lc-kg','lc-roast','lc-bag','lc-tot'];
+  if(!fobState){ out.forEach(i=>el(i).textContent='—'); el('lc-tbl').innerHTML=''; el('lc-kg-note').textContent='Uzupełnij cenę i kurs w przeliczniku powyżej'; return; }
+  const {usdKg, fx, loss} = fobState;
+  const cont = Math.max(1, Math.round(num('lc-cont')||1)), bags = Math.max(1, Math.round(num('lc-bags')||320));
+  const kg = cont*bags*60;
+  const fob = usdKg*fx*kg;
+  const fv = num('lc-frt'), fu = el('lc-frt-unit').value;
+  const frt = fu==='usdc' ? fv*cont*fx : fu==='usdt' ? fv*kg/1000*fx : fv*cont;
+  const iv = num('lc-ins'), ins = el('lc-ins-unit').value==='pct' ? (fob+frt)*iv/100 : iv;
+  const cif = fob+frt+ins;
+  const duty = cif*num('lc-duty')/100;
+  const port = cur('lc-port')*cont, road = cur('lc-road')*cont, clr = cur('lc-clr'), oth = cur('lc-oth');
+  const missing = [['lc-port','opłaty portowe'],['lc-clr','odprawa celna'],['lc-road','transport drogowy']].filter(([i])=>!num(i)).map(x=>x[1]);
+  const total = cif+duty+port+road+clr+oth;
+  const vat = (cif+duty+port+road)*num('lc-vat')/100;
+  const perKg = total/kg;
+  el('lc-kg').textContent = pl(perKg)+' zł';
+  el('lc-kg-note').textContent = `FOB ${pl(fob/kg)} zł/kg + logistyka ${pl((total-fob)/kg)} zł/kg (netto, bez VAT)` + (missing.length ? ` · brak: ${missing.join(', ')}` : '');
+  el('lc-roast').textContent = pl(perKg/(1-loss/100))+' zł';
+  el('lc-roast-note').textContent = `przy ubytku ${loss}% z przelicznika powyżej`;
+  el('lc-bag').textContent = pl(perKg*60,0)+' zł';
+  el('lc-bag-note').textContent = `${pl(perKg*60/fx,0)} USD`;
+  el('lc-tot').textContent = pl(total,0)+' zł';
+  el('lc-tot-note').textContent = `${pl(kg/1000,1)} t · ${cont*bags} worków · + VAT ${pl(vat,0)} zł do odliczenia`;
+  const rows = [['Kawa FOB (giełda ± premia)',fob],['Fracht morski',frt],['Ubezpieczenie',ins],['Cło',duty],['Opłaty portowe, THC',port],['Odprawa celna',clr],['Transport drogowy',road],['Inne',oth]];
+  el('lc-tbl').innerHTML = rows.map(([n,v])=>`<tr><td>${n}</td><td class="n">${(v===0 && ['Opłaty portowe, THC','Odprawa celna','Transport drogowy'].includes(n)) ? '<span class="small">do uzupełnienia</span>' : pl(v,0)}</td><td class="n">${pl(v/kg)}</td><td class="n">${pl(total?v/total*100:0,1)}%</td></tr>`).join('')
+    + `<tr><td><b>Razem w magazynie (netto)</b></td><td class="n"><b>${pl(total,0)}</b></td><td class="n"><b>${pl(perKg)}</b></td><td class="n">100,0%</td></tr>`
+    + `<tr><td>VAT z importu (do odliczenia)</td><td class="n">${pl(vat,0)}</td><td class="n">${pl(vat/kg)}</td><td class="n">—</td></tr>`;
+  el('lc-foot').textContent = `Wartość celna (CIF): ${pl(cif,0)} zł. Podstawa VAT z importu = CIF + cło + koszty transportu do miejsca przeznaczenia w Polsce. Kurs ${pl(fx,4)} PLN/USD.`;
+}
+['lc-cont','lc-bags','lc-frt','lc-ins','lc-port','lc-road','lc-clr','lc-oth','lc-duty','lc-vat'].forEach(id => el(id).addEventListener('input', landed));
+['lc-frt-unit','lc-ins-unit','lc-port-cur','lc-road-cur','lc-clr-cur','lc-oth-cur'].forEach(id => el(id).addEventListener('change', landed));
+eurSt();
+window.__cvHook = () => { if(cvSrc==='sa'||cvSrc==='sr') setSource(cvSrc); };
+setSource('a');
+</script>
+<script>
+/* Moduł notowań: bez obietnicy danych live, z kontrolą dat i jednostek. */
+(function(){
+'use strict';
+const $ = id => document.getElementById(id);
+const KEY='coffee-market-history-v1';
+const initial={...MARKET_SNAPSHOT.latest};
+let officialHistory=MARKET_SNAPSHOT.history;
+let rows=[]; let range='all';
+const fmt=(n,d=2)=>Number(n).toLocaleString('pl-PL',{minimumFractionDigits:d,maximumFractionDigits:d});
+const validDate=x=>/^\d{4}-\d{2}-\d{2}$/.test(x)&&!Number.isNaN(Date.parse(x+'T12:00:00Z'));
+const validRow=x=>x&&validDate(x.date)&&Number.isFinite(x.arabica)&&x.arabica>0&&Number.isFinite(x.robusta)&&x.robusta>0;
+function status(msg){$('market-status').textContent=msg;}
+function load(){try{const x=JSON.parse(localStorage.getItem(KEY)||'null');if(Array.isArray(x))rows=x.filter(validRow);}catch(e){status('Nie można odczytać zapisanej historii.');}const byDate=new Map(rows.map(r=>[r.date,r]));for(const r of officialHistory)byDate.set(r.date,r);rows=[...byDate.values()];}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(rows));return true;}catch(e){status('Nie udało się zapisać lokalnie. Wyeksportuj CSV.');return false;}}
+function latest(){return [...rows].sort((a,b)=>a.date.localeCompare(b.date)).at(-1);}
+function fill(x){$('market-date').value=x.date;$('market-a').value=x.arabica;$('market-r').value=x.robusta;$('market-contract-a').value=x.contractA||'';$('market-contract-r').value=x.contractR||'';$('market-source').value=x.source||'';}
+function redraw(){
+ const x=latest();if(!x)return;
+ SPOT.a=x.arabica;SPOT.r=x.robusta;SPOT.date=x.date.split('-').reverse().join('.');SPOT.rDate=SPOT.date;SPOT.contractA=x.contractA;SPOT.contractR=x.contractR;
+ $('market-kpi-a').innerHTML=fmt(x.arabica)+' <span class="kpi-unit">USc/lb</span>';
+ $('market-kpi-r').innerHTML=fmt(x.robusta,0)+' <span class="kpi-unit">USD/t</span>';
+ const spread=x.arabica-x.robusta/22.0462;
+ $('market-kpi-spread').innerHTML=fmt(spread,1)+' <span class="kpi-unit">USc/lb</span>';
+ const cards=$('market-kpi-a').closest('.grid').querySelectorAll('.card');
+ cards[0].querySelector('.kpi-meta').textContent=`${x.contractA||'Nieznana seria'}, rozliczenie ${x.date}. ${x.source||'Źródło niepodane'}.`;
+ cards[1].querySelector('.kpi-meta').textContent=`${x.contractR||'Nieznana seria'}, rozliczenie ${x.date}.`;
+ cards[3].querySelector('.chip').textContent='Premia arabiki '+fmt((spread/(x.robusta/22.0462))*100,1)+'%';
+ cards[3].querySelector('.kpi-meta').textContent='Spread wyliczony z ostatniego zapisanego zestawu notowań.';
+ // Usuwamy historyczne zmiany dzienne, które nie dotyczą nowych cen.
+ cards[0].querySelector('.chip').textContent='Rozliczenie: '+x.date;
+ cards[1].querySelector('.chip').textContent='Rozliczenie: '+x.date;
+ let sorted=[...rows].sort((a,b)=>a.date.localeCompare(b.date));
+ {
+   if(range!=='all'){const cutoff=new Date(x.date+'T12:00:00Z');cutoff.setUTCDate(cutoff.getUTCDate()-Number(range));sorted=sorted.filter(r=>new Date(r.date+'T12:00:00Z')>=cutoff);}
+   charts.trend.data.labels=sorted.map(r=>r.date);
+   charts.trend.data.datasets[0].data=sorted.map(r=>r.arabica);
+   charts.trend.data.datasets[1].data=sorted.map(r=>r.robusta/22.0462);
+   $('market-chart-note').textContent=`Historia sesji: ${sorted.length} obserwacji; Robusta przeliczona na USc/lb. Nie łącz różnych serii bez uwzględnienia rolowania.`;
+ }
+ charts.trend.update();
+ if(typeof setSource==='function' && (cvSrc==='a'||cvSrc==='r'))setSource(cvSrc);
+ status(`Ostatni zapis: ${x.date} | ${x.contractA||'Arabica'} / ${x.contractR||'Robusta'} | ${rows.length} obserwacji. To nie jest transmisja live.`);
+}
+function add(x){if(!validRow(x))throw Error('Sprawdź datę i dodatnie ceny.');rows=rows.filter(r=>r.date!==x.date);rows.push(x);rows.sort((a,b)=>a.date.localeCompare(b.date));persist();fill(latest());redraw();}
+$('market-save').addEventListener('click',()=>{try{add({date:$('market-date').value,arabica:Number($('market-a').value),robusta:Number($('market-r').value),contractA:$('market-contract-a').value.trim(),contractR:$('market-contract-r').value.trim(),source:$('market-source').value.trim()});}catch(e){status(e.message);}});
+$('market-reset').addEventListener('click',()=>{if(!confirm('Usunąć lokalną historię i przywrócić wartości początkowe?'))return;rows=officialHistory.map(x=>({...x}));persist();fill(latest());redraw();});
+function csvSplit(line,sep){const a=[];let v='',quoted=false;for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'){if(quoted&&line[i+1]==='"'){v+='"';i++;}else quoted=!quoted;}else if(c===sep&&!quoted){a.push(v.trim());v='';}else v+=c;}a.push(v.trim());return a;}
+const csvEscape=v=>'"'+String(v??'').replaceAll('"','""')+'"';
+$('market-export').addEventListener('click',()=>{const content=['data;arabica;robusta;seria_arabica;seria_robusta;zrodlo',...rows.map(r=>[r.date,r.arabica,r.robusta,r.contractA,r.contractR,r.source].map(csvEscape).join(';'))].join('\r\n');const blob=new Blob(['\uFEFF'+content],{type:'text/csv;charset=utf-8'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='notowania_kawy.csv';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);});
+$('market-import').addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;try{if(f.size>2_000_000)throw Error('Plik CSV jest za duży (maks. 2 MB).');const txt=(await f.text()).replace(/^\uFEFF/,'');const lines=txt.split(/\r?\n/).filter(x=>x.trim());if(lines.length<2)throw Error('CSV nie zawiera wierszy danych.');const sep=lines[0].includes(';')?';':',';const headers=csvSplit(lines[0],sep).map(x=>x.toLowerCase().trim());const get=(a,...names)=>{for(const n of names){const i=headers.indexOf(n);if(i>=0)return a[i];}return '';};if(!headers.includes('data')||!headers.includes('arabica')||!headers.includes('robusta'))throw Error('Wymagane nagłówki: data, arabica, robusta.');let count=0;const imported=[];for(const line of lines.slice(1)){const a=csvSplit(line,sep);const x={date:get(a,'data'),arabica:Number(get(a,'arabica').replace(',','.')),robusta:Number(get(a,'robusta').replace(',','.')),contractA:get(a,'seria_arabica'),contractR:get(a,'seria_robusta'),source:get(a,'zrodlo','źródło')};if(!validRow(x))throw Error('Błędny wiersz CSV: '+(count+2));imported.push(x);count++;}const byDate=new Map(rows.map(r=>[r.date,r]));for(const r of imported)byDate.set(r.date,r);rows=[...byDate.values()].sort((a,b)=>a.date.localeCompare(b.date));persist();fill(latest());redraw();status(`Zaimportowano ${count} wierszy. Ostatnia data: ${latest().date}.`);}catch(err){status('Błąd importu: '+err.message);}finally{e.target.value='';}});
+document.querySelectorAll('#market-range button').forEach(b=>b.addEventListener('click',()=>{range=b.dataset.range;document.querySelectorAll('#market-range button').forEach(y=>y.classList.toggle('on',y===b));redraw();}));
+window.applyOfficialHistory = history => {
+ if(!Array.isArray(history)||!history.length||!history.every(validRow))throw Error('Nieprawidłowa historia serwera');
+ officialHistory=history;
+ const byDate=new Map(rows.map(r=>[r.date,r]));for(const r of history)byDate.set(r.date,r);
+ rows=[...byDate.values()];fill(latest());redraw();
+};
+load();fill(latest());redraw();
+})();
+</script>
+
+<script>
+function applySnapshot(doc){
+ if(doc.schemaVersion!==1||!doc.latest||!Array.isArray(doc.history)||!doc.curve)throw Error('Błędny format danych serwera');
+ window.applyOfficialHistory(doc.history);
+ const a=doc.curve.arabica,r=doc.curve.robusta;
+ const good=x=>Array.isArray(x)&&x.length===3&&x.every(v=>Number.isFinite(v.price)&&v.price>0&&/^\d{4}-\d{2}$/.test(v.delivery)&&/^[A-Z0-9]+$/.test(v.contract));
+ if(!good(a)||!good(r))throw Error('Nieprawidłowe serie kontraktów');
+ const body=el('curve-table');body.replaceChildren();
+ for(let i=0;i<3;i++){
+  const tr=document.createElement('tr');
+  for(const [j,val] of [a[i].contract,fmt(a[i].price,2),r[i].contract,fmt(r[i].price,0)].entries()){
+   const td=document.createElement('td');td.textContent=val;if(j%2)td.className='n';tr.appendChild(td);
+  }body.appendChild(tr);
+ }
+ charts.curve.data.labels=a.map((v,i)=>v.contract+' / '+r[i].contract);
+ charts.curve.data.datasets[0].data=a.map(v=>v.price);
+ charts.curve.data.datasets[1].data=r.map(v=>v.price/22.0462);charts.curve.update();
+ el('curve-description').textContent='Trzy serie kontraktów z publicznej tabeli Coffee Board of India. Data sesji: '+doc.curve.date+'. Dalszych terminów źródło nie podaje.';
+ el('curve-note').textContent='Coffee Board of India, Futures Price, '+doc.curve.date+'. Arabica: USc/lb; robusta: USD/t przeliczone na USc/lb na wykresie.';
+ // Use nearest two known 2027 contracts; carry the last quote forward only inside the educational model.
+ const nextA=a.filter(v=>v.delivery.startsWith('2027'));
+ const nextR=r.filter(v=>v.delivery.startsWith('2027'));
+ for(const [quotes,target] of [[nextA,CURVE_A],[nextR,CURVE_R]]){
+  if(!quotes.length)continue;
+  for(let i=0;i<4;i++)target[i]=quotes[Math.min(i,quotes.length-1)].price/(target===CURVE_R?22.0462:1);
+ }
+ render();
+ const time=s=>s?new Date(s).toLocaleString('pl-PL',{timeZone:'Europe/Warsaw'}):'brak';
+ let note='Sesja kawy: '+doc.latest.date+' • Źródło: Coffee Board of India • Ostatnia udana kontrola kawy: '+time(doc.lastSuccessAt)+' • Próba aktualizacji: '+time(doc.lastAttemptAt)+'.';
+ const age=(Date.now()-Date.parse(doc.latest.date+'T00:00:00Z'))/86400000;
+ if(age>4)note+=' UWAGA: źródło zawiera dane starsze niż 4 dni.';
+ if(doc.errors?.length)note+=' Ostatnia aktualizacja była niepełna; zachowano wcześniejsze dane. Szczegóły: '+doc.errors.join(' | ');
+ el('snapshot-meta').textContent=note+' Raporty ICO, USDA, BMI i prognozy mają osobne daty i nie są aktualizowane codziennie.';
+}
+try{applySnapshot(MARKET_SNAPSHOT);}catch(e){el('snapshot-meta').textContent='Błąd danych początkowych: '+e.message;}
+fetch('./data/market.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('HTTP '+r.status);return r.json();}).then(applySnapshot).catch(()=>{
+ el('snapshot-meta').textContent+=' Nie udało się wczytać pliku danych serwera — widoczna jest kopia dołączona do strony.';
+});
+</script>
+</body>
+</html>

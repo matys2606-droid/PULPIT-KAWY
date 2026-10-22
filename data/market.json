@@ -1,0 +1,83 @@
+{
+  "lastAttemptAt": "2026-10-22T21:31:48+00:00",
+  "errors": [],
+  "latest": {
+    "date": "2026-10-21",
+    "arabica": 316.15,
+    "robusta": 3352.0,
+    "contractA": "KCZ26",
+    "contractR": "RCX26",
+    "source": "Coffee Board of India — Futures Price",
+    "sourceUrl": "https://coffeeboard.gov.in/"
+  },
+  "curve": {
+    "date": "2026-10-21",
+    "arabica": [
+      {
+        "delivery": "2026-12",
+        "label": "Dec-2026",
+        "contract": "KCZ26",
+        "price": 316.15
+      },
+      {
+        "delivery": "2027-03",
+        "label": "Mar-2027",
+        "contract": "KCH27",
+        "price": 301.25
+      },
+      {
+        "delivery": "2027-05",
+        "label": "May-2027",
+        "contract": "KCK27",
+        "price": 296.2
+      }
+    ],
+    "robusta": [
+      {
+        "delivery": "2026-11",
+        "label": "Nov-2026",
+        "contract": "RCX26",
+        "price": 3352.0
+      },
+      {
+        "delivery": "2027-01",
+        "label": "Jan-2027",
+        "contract": "RCF27",
+        "price": 3364.0
+      },
+      {
+        "delivery": "2027-03",
+        "label": "Mar-2027",
+        "contract": "RCH27",
+        "price": 3344.0
+      }
+    ]
+  },
+  "history": [
+    {
+      "date": "2026-10-21",
+      "arabica": 316.15,
+      "robusta": 3352.0,
+      "contractA": "KCZ26",
+      "contractR": "RCX26",
+      "source": "Coffee Board of India — Futures Price",
+      "sourceUrl": "https://coffeeboard.gov.in/"
+    }
+  ],
+  "lastSuccessAt": "2026-10-22T21:31:48+00:00",
+  "fx": {
+    "usd": {
+      "rate": 3.8886,
+      "date": "2026-10-22",
+      "no": "206/A/NBP/2026",
+      "source": "NBP tabela A"
+    },
+    "eur": {
+      "rate": 4.3685,
+      "date": "2026-10-22",
+      "no": "206/A/NBP/2026",
+      "source": "NBP tabela A"
+    }
+  },
+  "schemaVersion": 1
+}
