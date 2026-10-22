@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Refresh public daily coffee quotations and NBP FX; no API keys required."""
 import argparse
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timezone, timedelta
 from html.parser import HTMLParser
 import json
 from pathlib import Path
@@ -11,6 +11,10 @@ from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = 'https://coffeeboard.gov.in/'
+INVESTING = {
+    'arabica': 'https://pl.investing.com/commodities/us-coffee-c-historical-data',
+    'robusta': 'https://pl.investing.com/commodities/london-coffee-historical-data',
+}
 MONTHS = dict(zip(('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'), range(1,13)))
 CODES = dict(zip(range(1,13), 'FGHJKMNQUVXZ'))
 
@@ -56,6 +60,43 @@ def parse_board(html, today=None):
     latest = dict(date=session.isoformat(), arabica=a[0]['price'], robusta=r[0]['price'],contractA=a[0]['contract'],contractR=r[0]['contract'],source='Coffee Board of India — Futures Price',sourceUrl=SOURCE)
     return latest, dict(date=session.isoformat(), arabica=a, robusta=r)
 
+def parse_investing(html, kind, today=None):
+    # Read only public server-rendered historical data, never the live headline quote.
+    match = re.search(r'<script[^>]*id="__NEXT_DATA__"[^>]*>(.*?)</script>', html, re.S)
+    if not match: raise ValueError('Missing historical data JSON')
+    state = json.loads(match[1])['props']['pageProps']['state']
+    title = state['pageInfoStore']['titles']['h1_head']
+    prefix = 'KC' if kind == 'arabica' else 'RC'
+    contract = re.search(r"'([0-9]{2})\s*\((" + prefix + r"[FGHJKMNQUVXZ])[0-9]{1,2}\)", title)
+    if not contract: raise ValueError('Unrecognized coffee contract')
+    code = contract[2] + contract[1]
+    records = {}
+    for row in state['historicalDataStore']['historicalData']['data']:
+        day = date.fromisoformat(row['rowDateTimestamp'][:10])
+        # Morning daily job: today's row may still be an unfinished session.
+        if day >= (today or datetime.now(timezone.utc).date()): continue
+        price = round(float(row['last_closeRaw']), 2)
+        low, high = float(row['last_minRaw']), float(row['last_maxRaw'])
+        if not (10 < price < 2000 if kind == 'arabica' else 100 < price < 20000):
+            raise ValueError('Historical close outside validation bounds')
+        if not low <= price <= high: raise ValueError('Close outside session range')
+        records[day.isoformat()] = price
+    if not records: raise ValueError('No completed sessions')
+    return code, records
+
+def investing_latest(getter, today=None):
+    a, ah = parse_investing(getter(INVESTING['arabica']), 'arabica', today)
+    r, rh = parse_investing(getter(INVESTING['robusta']), 'robusta', today)
+    common = sorted(set(ah) & set(rh))
+    if not common: raise ValueError('No common coffee session')
+    day = common[-1]
+    # Do not silently select an old overlap when one market has newer data.
+    if day != max(ah) or day != max(rh): raise ValueError('Coffee session dates differ')
+    return dict(date=day, arabica=ah[day], robusta=rh[day], contractA=a, contractR=r,
+                source='Investing.com — historyczne ceny zamknięcia (dane pochodne)',
+                sourceUrl=INVESTING['robusta'], sourceUrls=INVESTING,
+                priceType='historical_close')
+
 def download(url):
     req = Request(url, headers={'User-Agent':'CoffeeMarketDashboard/1.0 (daily public report reader)', 'Accept':'text/html,application/json'})
     with urlopen(req, timeout=30) as response:
@@ -68,16 +109,37 @@ def refresh(doc, getter=download, now=None):
     doc['lastAttemptAt'] = stamp
     doc['errors'] = []
     failed = False
+    doc['warnings'] = []
+    latest = None
     try:
-        latest, curve = parse_board(getter(SOURCE))
-        if doc.get('latest',{}).get('date','') > latest['date']:
-            raise ValueError('Source session is older than saved session')
+        instant = now or datetime.now(timezone.utc)
+        # Both coffee sessions have ended by 21:00 UTC; otherwise use prior days.
+        cutoff = instant.date() + timedelta(days=int(instant.hour >= 21))
+        latest = investing_latest(getter, cutoff)
+        if doc.get('latest', {}).get('date', '') > latest['date']:
+            raise ValueError('Investing session is older than saved session')
+    except Exception as exc:
+        doc['warnings'].append('Investing: ' + str(exc) + '. Próba źródła zapasowego.')
+        latest = None
+    try:
+        board, curve = parse_board(getter(SOURCE))
+        if curve['date'] >= doc.get('curve', {}).get('date', ''):
+            doc['curve'] = curve
+        if latest is None:
+            if doc.get('latest', {}).get('date', '') > board['date']:
+                raise ValueError('Backup session is older than saved session; retained saved prices')
+            latest = board
+            doc['warnings'].append('Użyto źródła zapasowego: Coffee Board of India.')
+    except Exception as exc:
+        if latest is None:
+            failed = True
+            doc['errors'].append('Coffee Board: ' + str(exc))
+        else:
+            doc['warnings'].append('Krzywa kontraktów Coffee Board: ' + str(exc))
+    if latest is not None:
         history = {x['date']:x for x in doc.get('history',[])}
         history[latest['date']] = latest
-        doc.update(latest=latest,curve=curve,history=[history[k] for k in sorted(history)],lastSuccessAt=stamp)
-    except Exception as exc:
-        failed = True
-        doc['errors'].append('Coffee Board: ' + str(exc))
+        doc.update(latest=latest,history=[history[k] for k in sorted(history)],lastSuccessAt=stamp)
     doc.setdefault('fx', {})
     for currency in ('usd','eur'):
         try:

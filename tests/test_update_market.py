@@ -44,4 +44,32 @@ class ParserTests(unittest.TestCase):
    return html() if url==m.SOURCE else json.dumps({'rates':[{'mid':4,'effectiveDate':'2026-10-21','no':'205/A/NBP/2026'}]})
   doc,failed=m.refresh(dict(latest=latest,curve=curve,history=[latest]),getter)
   self.assertTrue(failed);self.assertEqual(doc['latest']['date'],'2026-10-22')
+
+ def investing_html(self, kind, day='2026-10-22', price=None):
+  price = price or (311.4 if kind=='arabica' else 3280)
+  title = "Kawa - Gru. '26 (KCZ6)" if kind=='arabica' else "Kawa - Lis. '26 (RCX6)"
+  state={'pageInfoStore':{'titles':{'h1_head':title}},'historicalDataStore':{'historicalData':{'data':[{'rowDateTimestamp':day+'T00:00:00Z','last_closeRaw':str(price),'last_minRaw':str(price-1),'last_maxRaw':str(price+1)}]}}}
+  return '<script id="__NEXT_DATA__">'+json.dumps({'props':{'pageProps':{'state':state}}})+'</script>'
+ def test_investing_success_has_priority_and_preserves_curve(self):
+  def getter(url):
+   if url in m.INVESTING.values():return self.investing_html('arabica' if url==m.INVESTING['arabica'] else 'robusta')
+   if url==m.SOURCE:return html()
+   return json.dumps({'rates':[{'mid':4,'effectiveDate':'2026-10-21','no':'test'}]})
+  doc,failed=m.refresh({},getter,m.datetime(2026,10,23,6,tzinfo=m.timezone.utc))
+  self.assertFalse(failed);self.assertEqual(doc['latest']['arabica'],311.4)
+  self.assertEqual(doc['latest']['contractA'],'KCZ26');self.assertEqual(doc['latest']['contractR'],'RCX26')
+  self.assertEqual(doc['curve']['date'],'2026-10-21');self.assertEqual(doc['latest']['date'],'2026-10-22')
+ def test_investing_rejects_unfinished_session_and_bad_price(self):
+  with self.assertRaises(ValueError):m.parse_investing(self.investing_html('robusta'),'robusta',date(2026,10,22))
+  with self.assertRaises(ValueError):m.parse_investing(self.investing_html('robusta',price=1),'robusta',date(2026,10,23))
+ def test_mismatched_investing_sessions_fall_back(self):
+  def getter(url):
+   if url==m.INVESTING['arabica']:return self.investing_html('arabica')
+   if url==m.INVESTING['robusta']:return self.investing_html('robusta',day='2026-10-21')
+   if url==m.SOURCE:return html()
+   return json.dumps({'rates':[{'mid':4,'effectiveDate':'2026-10-21','no':'test'}]})
+  doc,failed=m.refresh({},getter,m.datetime(2026,10,23,6,tzinfo=m.timezone.utc))
+  self.assertFalse(failed);self.assertEqual(doc['latest']['arabica'],316.15)
+  self.assertIn('Coffee Board',doc['latest']['source']);self.assertTrue(doc['warnings'])
+
 if __name__=='__main__':unittest.main()

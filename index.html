@@ -140,7 +140,7 @@ span.sel{display:flex;align-items:center;white-space:nowrap;color:var(--muted)}
   <section class="panel active" id="rynek">
     <div class="card" id="market-update" style="margin-bottom:16px">
       <h3>Aktualizacja notowań ICE i wykresów</h3>
-      <p class="small">Serwer raz dziennie sprawdza publiczną tabelę Coffee Board of India i kursy NBP. Wyświetlamy datę sesji źródłowej, która może być wcześniejsza od dnia sprawdzenia. Własne notowania i CSV zapisują się tylko w tej przeglądarce.</p>
+      <p class="small">Serwer raz dziennie pobiera historyczne ceny zamknięcia Investing.com. Przy błędzie korzysta z Coffee Board of India. Krzywa dalszych kontraktów pochodzi z Coffee Board, kursy walut z NBP. Wyświetlamy datę sesji źródłowej, która może być wcześniejsza od dnia sprawdzenia. Własne notowania i CSV zapisują się tylko w tej przeglądarce.</p>
       <div class="row2">
         <div class="ctrl"><label for="market-date">Data rozliczenia</label><input class="inp" id="market-date" type="date" value="2026-10-21"></div>
         <div class="ctrl"><label for="market-contract-a">Seria arabiki (np. KCZ26)</label><input class="inp" id="market-contract-a" value="KCZ26" maxlength="24"></div>
@@ -595,7 +595,7 @@ span.sel{display:flex;align-items:center;white-space:nowrap;color:var(--muted)}
 </main>
 
 <footer class="wrap">
-  <p><b>Dane dzienne:</b> <a href="https://coffeeboard.gov.in/">Coffee Board of India — publiczna tabela Futures Price</a>. Harmonogram sprawdza źródło raz dziennie. W razie błędu zachowuje ostatni prawidłowy odczyt. Nie gwarantujemy publikacji źródła w określonej godzinie.</p>
+  <p><b>Dane dzienne:</b> Investing.com — historyczne ceny zamknięcia (dane pochodne). Źródło zapasowe i krzywa kontraktów: <a href="https://coffeeboard.gov.in/">Coffee Board of India — publiczna tabela Futures Price</a>. Harmonogram sprawdza źródło raz dziennie. W razie błędu zachowuje ostatni prawidłowy odczyt. Nie gwarantujemy publikacji źródła w określonej godzinie.</p>
   <p><b>Archiwalne źródła: weryfikacja 22.10.2026.</b> Ceny i niepełna krzywa: <a href="https://www.cocoaintel.com/coffee-pulls-back-as-london-moves-into-a-nearby-discount-20-october-2026/">CocoaIntel, sesja 20.10</a>. Raport StoneX z 21.10 jest dostępny, ale jego tabele nie dały się odczytać — nie przypisano cen z 20.10 do nowszej sesji.</p>
   <p>Średnie i zapasy: <a href="https://ico.org/documents/cy2025-26/cmr-0926-e.pdf">ICO, wrzesień 2026</a>. Bilans: <a href="https://apps.fas.usda.gov/psdonline/circulars/coffee.pdf">USDA FAS, lipiec 2026</a>. BMI: <a href="https://informistmedia.com/CommodityWire/58995/costly-brew-BMI-lifts-coffee-price-forecast-amid-tight-stocks-El-Nino-risks-in-Asia">relacja Informist</a>; brak potwierdzonej nowszej rewizji. Ceny prognozowane: <a href="https://blogs.worldbank.org/en/opendata/beverage-prices-retreat-as-supplies-recover">Bank Światowy, 07.07.2026</a>. Pogoda: <a href="https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso_advisory/ensodisc.shtml">NOAA/CPC, 08.10.2026</a>.</p>
   <p>Kursy awaryjne: USD 3,8886, EUR 4,3685 PLN, 22.10.2026, tabela 206/A/NBP/2026 — <a href="https://azfinanse.mybank.pl/kursy-walut/">publikacja kursów NBP</a>. Serwer sprawdza kursy NBP codziennie; przeglądarka dodatkowo próbuje pobrać bieżącą tabelę przy otwarciu. Gdy API NBP nie odpowiada, używane są ostatnie kursy z pliku danych serwera. <a href="https://www.biznes.gov.pl/pl/portal/00232">Podstawowa stawka VAT</a>. Koszty logistyki i parametry modelu są założeniami, nie notowaniami rynkowymi.</p>
@@ -939,8 +939,8 @@ function redraw(){
  const spread=x.arabica-x.robusta/22.0462;
  $('market-kpi-spread').innerHTML=fmt(spread,1)+' <span class="kpi-unit">USc/lb</span>';
  const cards=$('market-kpi-a').closest('.grid').querySelectorAll('.card');
- cards[0].querySelector('.kpi-meta').textContent=`${x.contractA||'Nieznana seria'}, rozliczenie ${x.date}. ${x.source||'Źródło niepodane'}.`;
- cards[1].querySelector('.kpi-meta').textContent=`${x.contractR||'Nieznana seria'}, rozliczenie ${x.date}.`;
+ cards[0].querySelector('.kpi-meta').textContent=`${x.contractA||'Nieznana seria'}, sesja ${x.date}. ${x.source||'Źródło niepodane'}.`;
+ cards[1].querySelector('.kpi-meta').textContent=`${x.contractR||'Nieznana seria'}, sesja ${x.date}.`;
  cards[3].querySelector('.chip').textContent='Premia arabiki '+fmt((spread/(x.robusta/22.0462))*100,1)+'%';
  cards[3].querySelector('.kpi-meta').textContent='Spread wyliczony z ostatniego zapisanego zestawu notowań.';
  // Usuwamy historyczne zmiany dzienne, które nie dotyczą nowych cen.
@@ -1013,9 +1013,10 @@ function applySnapshot(doc){
  }
  render();
  const time=s=>s?new Date(s).toLocaleString('pl-PL',{timeZone:'Europe/Warsaw'}):'brak';
- let note='Sesja kawy: '+doc.latest.date+' • Źródło: Coffee Board of India • Ostatnia udana kontrola kawy: '+time(doc.lastSuccessAt)+' • Próba aktualizacji: '+time(doc.lastAttemptAt)+'.';
+ let note='Sesja kawy: '+doc.latest.date+' • Źródło: '+(doc.latest.source||'brak')+' • Ostatnia udana kontrola kawy: '+time(doc.lastSuccessAt)+' • Próba aktualizacji: '+time(doc.lastAttemptAt)+'.';
  const age=(Date.now()-Date.parse(doc.latest.date+'T00:00:00Z'))/86400000;
  if(age>4)note+=' UWAGA: źródło zawiera dane starsze niż 4 dni.';
+ if(doc.warnings?.length)note+=' '+doc.warnings.join(' | ');
  if(doc.errors?.length)note+=' Ostatnia aktualizacja była niepełna; zachowano wcześniejsze dane. Szczegóły: '+doc.errors.join(' | ');
  el('snapshot-meta').textContent=note+' Raporty ICO, USDA, BMI i prognozy mają osobne daty i nie są aktualizowane codziennie.';
 }
