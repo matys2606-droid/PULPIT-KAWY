@@ -205,7 +205,7 @@ span.sel{display:flex;align-items:center;white-space:nowrap;color:var(--muted)}
       </div>
       <div class="card">
         <h3>Zmienność 2026</h3>
-        <p class="small">We wrześniu średnie ICE spadły wobec sierpnia. Rozliczenie z 20 października jest osobną obserwacją dzienną i nie stanowi średniej za październik.</p>
+        <p class="small">We wrześniu średnie ICE spadły wobec sierpnia. Dzienne ceny październikowe są osobnymi obserwacjami i nie stanowią średniej za październik.</p>
         <div class="chart-box sm"><canvas id="mom"></canvas></div>
         <p class="footnote">Zmiana średnich miesięcznych m/m w procentach (nie w punktach procentowych). Wrzesień: arabica −10,4%, robusta −8,0%.</p>
       </div>
@@ -598,7 +598,7 @@ span.sel{display:flex;align-items:center;white-space:nowrap;color:var(--muted)}
   <p><b>Dane dzienne:</b> <a href="https://coffeeboard.gov.in/">Coffee Board of India — publiczna tabela Futures Price</a>. Harmonogram sprawdza źródło raz dziennie. W razie błędu zachowuje ostatni prawidłowy odczyt. Nie gwarantujemy publikacji źródła w określonej godzinie.</p>
   <p><b>Archiwalne źródła: weryfikacja 22.10.2026.</b> Ceny i niepełna krzywa: <a href="https://www.cocoaintel.com/coffee-pulls-back-as-london-moves-into-a-nearby-discount-20-october-2026/">CocoaIntel, sesja 20.10</a>. Raport StoneX z 21.10 jest dostępny, ale jego tabele nie dały się odczytać — nie przypisano cen z 20.10 do nowszej sesji.</p>
   <p>Średnie i zapasy: <a href="https://ico.org/documents/cy2025-26/cmr-0926-e.pdf">ICO, wrzesień 2026</a>. Bilans: <a href="https://apps.fas.usda.gov/psdonline/circulars/coffee.pdf">USDA FAS, lipiec 2026</a>. BMI: <a href="https://informistmedia.com/CommodityWire/58995/costly-brew-BMI-lifts-coffee-price-forecast-amid-tight-stocks-El-Nino-risks-in-Asia">relacja Informist</a>; brak potwierdzonej nowszej rewizji. Ceny prognozowane: <a href="https://blogs.worldbank.org/en/opendata/beverage-prices-retreat-as-supplies-recover">Bank Światowy, 07.07.2026</a>. Pogoda: <a href="https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso_advisory/ensodisc.shtml">NOAA/CPC, 08.10.2026</a>.</p>
-  <p>Kursy awaryjne: USD 3,8886, EUR 4,3685 PLN, 22.10.2026, tabela 206/A/NBP/2026 — <a href="https://azfinanse.mybank.pl/kursy-walut/">publikacja kursów NBP</a>. Bezpośredni odczyt archiwum NBP nie był dostępny podczas aktualizacji; aplikacja nadal próbuje pobrać kursy bezpośrednio z API NBP przy otwarciu. <a href="https://www.biznes.gov.pl/pl/portal/00232">Podstawowa stawka VAT</a>. Koszty logistyki i parametry modelu są założeniami, nie notowaniami rynkowymi.</p>
+  <p>Kursy awaryjne: USD 3,8886, EUR 4,3685 PLN, 22.10.2026, tabela 206/A/NBP/2026 — <a href="https://azfinanse.mybank.pl/kursy-walut/">publikacja kursów NBP</a>. Serwer sprawdza kursy NBP codziennie; przeglądarka dodatkowo próbuje pobrać bieżącą tabelę przy otwarciu. Gdy API NBP nie odpowiada, używane są ostatnie kursy z pliku danych serwera. <a href="https://www.biznes.gov.pl/pl/portal/00232">Podstawowa stawka VAT</a>. Koszty logistyki i parametry modelu są założeniami, nie notowaniami rynkowymi.</p>
   <p>Pulpit ma charakter informacyjny. Ceny kontraktów terminowych zmieniają się w ciągu dnia; przed decyzjami handlowymi zweryfikuj bieżące notowania.</p>
 </footer>
 
@@ -980,6 +980,15 @@ load();fill(latest());redraw();
 function applySnapshot(doc){
  if(doc.schemaVersion!==1||!doc.latest||!Array.isArray(doc.history)||!doc.curve)throw Error('Błędny format danych serwera');
  window.applyOfficialHistory(doc.history);
+ const fxValid=x=>x&&Number.isFinite(x.rate)&&x.rate>0&&/^\d{4}-\d{2}-\d{2}$/.test(x.date);
+ if(fxValid(doc.fx?.usd)&&!fxNbp.live&&doc.fx.usd.date>=fxNbp.date){
+  const untouched=Number(el('cv-fx').value)===fxNbp.rate;
+  fxNbp={...doc.fx.usd,live:false};
+  if(untouched)el('cv-fx').value=fxNbp.rate;
+  fxStatus();
+ }
+ if(fxValid(doc.fx?.eur)&&!eurNbp.live&&doc.fx.eur.date>=eurNbp.date){eurNbp={...doc.fx.eur,live:false};eurSt();}
+ convert();
  const a=doc.curve.arabica,r=doc.curve.robusta;
  const good=x=>Array.isArray(x)&&x.length===3&&x.every(v=>Number.isFinite(v.price)&&v.price>0&&/^\d{4}-\d{2}$/.test(v.delivery)&&/^[A-Z0-9]+$/.test(v.contract));
  if(!good(a)||!good(r))throw Error('Nieprawidłowe serie kontraktów');
