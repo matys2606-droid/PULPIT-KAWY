@@ -1,14 +1,19 @@
 {
-  "lastAttemptAt": "2026-10-22T22:19:05+00:00",
+  "lastAttemptAt": "2026-10-23T07:05:06+00:00",
   "errors": [],
   "latest": {
-    "date": "2026-10-21",
-    "arabica": 316.15,
-    "robusta": 3352.0,
+    "date": "2026-10-22",
+    "arabica": 312.45,
+    "robusta": 3288.0,
     "contractA": "KCZ26",
     "contractR": "RCX26",
-    "source": "Coffee Board of India — Futures Price",
-    "sourceUrl": "https://coffeeboard.gov.in/"
+    "source": "Investing.com — historyczne ceny zamknięcia (dane pochodne)",
+    "sourceUrl": "https://pl.investing.com/commodities/london-coffee-historical-data",
+    "sourceUrls": {
+      "arabica": "https://pl.investing.com/commodities/us-coffee-c-historical-data",
+      "robusta": "https://pl.investing.com/commodities/london-coffee-historical-data"
+    },
+    "priceType": "historical_close"
   },
   "curve": {
     "date": "2026-10-21",
@@ -62,9 +67,23 @@
       "contractR": "RCX26",
       "source": "Coffee Board of India — Futures Price",
       "sourceUrl": "https://coffeeboard.gov.in/"
+    },
+    {
+      "date": "2026-10-22",
+      "arabica": 312.45,
+      "robusta": 3288.0,
+      "contractA": "KCZ26",
+      "contractR": "RCX26",
+      "source": "Investing.com — historyczne ceny zamknięcia (dane pochodne)",
+      "sourceUrl": "https://pl.investing.com/commodities/london-coffee-historical-data",
+      "sourceUrls": {
+        "arabica": "https://pl.investing.com/commodities/us-coffee-c-historical-data",
+        "robusta": "https://pl.investing.com/commodities/london-coffee-historical-data"
+      },
+      "priceType": "historical_close"
     }
   ],
-  "lastSuccessAt": "2026-10-22T22:19:05+00:00",
+  "lastSuccessAt": "2026-10-23T07:05:06+00:00",
   "fx": {
     "usd": {
       "rate": 3.8886,
@@ -80,8 +99,5 @@
     }
   },
   "schemaVersion": 1,
-  "warnings": [
-    "Investing: HTTP Error 403: Forbidden. Próba źródła zapasowego.",
-    "Użyto źródła zapasowego: Coffee Board of India."
-  ]
+  "warnings": []
 }
