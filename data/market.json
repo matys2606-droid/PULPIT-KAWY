@@ -1,6 +1,8 @@
 {
-  "lastAttemptAt": "2026-10-23T07:05:06+00:00",
-  "errors": [],
+  "lastAttemptAt": "2026-10-24T07:01:18+00:00",
+  "errors": [
+    "Coffee Board: Backup session is older than saved session; retained saved prices"
+  ],
   "latest": {
     "date": "2026-10-22",
     "arabica": 312.45,
@@ -86,18 +88,20 @@
   "lastSuccessAt": "2026-10-23T07:05:06+00:00",
   "fx": {
     "usd": {
-      "rate": 3.8886,
-      "date": "2026-10-22",
-      "no": "206/A/NBP/2026",
+      "rate": 3.9247,
+      "date": "2026-10-23",
+      "no": "207/A/NBP/2026",
       "source": "NBP tabela A"
     },
     "eur": {
-      "rate": 4.3685,
-      "date": "2026-10-22",
-      "no": "206/A/NBP/2026",
+      "rate": 4.3917,
+      "date": "2026-10-23",
+      "no": "207/A/NBP/2026",
       "source": "NBP tabela A"
     }
   },
   "schemaVersion": 1,
-  "warnings": []
+  "warnings": [
+    "Investing: HTTP Error 403: Forbidden. Próba źródła zapasowego."
+  ]
 }
