@@ -32,33 +32,28 @@ jobs:
         id: refresh
         continue-on-error: true
         run: python scripts/update_market.py
-      - name: Diagnostyka dostępności źródeł po błędzie
-        if: steps.refresh.outcome == 'failure'
+      - name: Raport aktualizacji
+        if: always()
         run: |
           python - <<'PYTHON'
-          import concurrent.futures, html, json, re
-          from urllib.request import Request, urlopen
-          urls = [
-              'https://markets.ft.com/data/commodities/tearsheet/historical?c=Coffee%20(Robusta)',
-              'https://markets.ft.com/data/commodities/tearsheet/historical?c=Coffee%20(Arabica)',
-              'https://sbcharts.investing.com/charts_json/8980.json',
-              'https://sbcharts.investing.com/charts_json/8832.json',
+          import json, os
+          from pathlib import Path
+          doc = json.loads(Path('data/market.json').read_text())
+          latest = doc['latest']
+          lines = [
+              '## Aktualizacja rynku kawy',
+              f"Sesja: {latest['date']}",
+              f"Źródło: {latest['source']}",
+              f"Arabika: {latest['arabica']} USc/lb; robusta: {latest['robusta']} USD/t",
+              f"Krzywa kontraktów: {doc.get('curve', {}).get('date', 'brak')}",
           ]
-          def probe(url):
-              try:
-                  request = Request(url, headers={'User-Agent': 'CoffeeMarketDashboard/1.0 (public daily quotations)'})
-                  with urlopen(request, timeout=20) as response:
-                      body = response.read(2_000_000).decode('utf-8', errors='replace')
-                  snippets = re.findall(r'<table.*?</table>', body, re.S)
-                  sample = ' | '.join(x[:4000] for x in snippets[:2]) if snippets else body[:2500]
-                  sample += ' | ' + ' | '.join(re.findall(r'.{0,100}(?:data-symbol|instrumentId|mod-tearsheet-overview__header|KCZ|RCX|Coffee|Robusta|symbol=).{0,220}', body)[:8])
-                  message = url + ': ' + sample
-              except Exception as exc:
-                  message = url + ': ' + str(exc)
-              message = message.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
-              print('::notice title=Diagnostyka źródła::' + message)
-          with concurrent.futures.ThreadPoolExecutor(max_workers=5) as pool:
-              list(pool.map(probe, urls))
+          lines += ['Ostrzeżenie: ' + x for x in doc.get('warnings', [])]
+          lines += ['Błąd: ' + x for x in doc.get('errors', [])]
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as report:
+              report.write('\n\n'.join(lines) + '\n')
+          for line in lines[1:]:
+              safe = line.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+              print('::notice title=Wynik aktualizacji::' + safe)
           PYTHON
       - name: Zapisz dane i historię w repozytorium
         run: |

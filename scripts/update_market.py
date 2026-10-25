@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Refresh public daily coffee quotations and NBP FX; no API keys required."""
 import argparse
+import math
 from datetime import date, datetime, timezone, timedelta
 from html.parser import HTMLParser
 import json
@@ -14,6 +15,10 @@ SOURCE = 'https://coffeeboard.gov.in/'
 INVESTING = {
     'arabica': 'https://pl.investing.com/commodities/us-coffee-c-historical-data',
     'robusta': 'https://pl.investing.com/commodities/london-coffee-historical-data',
+}
+FT = {
+    'arabica': 'https://markets.ft.com/data/commodities/tearsheet/historical?c=Coffee%20(Arabica)',
+    'robusta': 'https://markets.ft.com/data/commodities/tearsheet/historical?c=Coffee%20(Robusta)',
 }
 MONTHS = dict(zip(('Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'), range(1,13)))
 CODES = dict(zip(range(1,13), 'FGHJKMNQUVXZ'))
@@ -97,6 +102,87 @@ def investing_latest(getter, today=None):
                 sourceUrl=INVESTING['robusta'], sourceUrls=INVESTING,
                 priceType='historical_close')
 
+class HistoricalTable(HTMLParser):
+    """Read only FT's historical table, preserving separate mobile date labels."""
+    def __init__(self):
+        super().__init__()
+        self.active = False
+        self.rows = []
+        self.row = None
+        self.cell = None
+
+    def handle_starttag(self, tag, attrs):
+        if tag == 'table':
+            self.active = 'mod-tearsheet-historical-prices__results' in dict(attrs).get('class', '').split()
+        if not self.active:
+            return
+        if tag == 'tr':
+            self.row = []
+        elif tag in ('td', 'th'):
+            self.cell = []
+
+    def handle_data(self, text):
+        if self.active and self.cell is not None:
+            self.cell.append(text)
+
+    def handle_endtag(self, tag):
+        if tag in ('td', 'th') and self.cell is not None:
+            self.row.append(' '.join(self.cell).strip())
+            self.cell = None
+        elif tag == 'tr' and self.active and self.row is not None:
+            self.rows.append(self.row)
+            self.row = None
+        elif tag == 'table':
+            self.active = False
+
+def parse_ft(html, kind, today=None):
+    headings = re.findall(r'<h1\b[^>]*>(.*?)</h1>', html, re.I | re.S)
+    identity = ' '.join(re.sub(r'<[^>]+>', ' ', heading) for heading in headings)
+    if kind not in FT or not re.search(r'Coffee\s*\(' + kind + r'\)', identity, re.I):
+        raise ValueError('Wrong FT coffee instrument')
+    table = HistoricalTable()
+    table.feed(html)
+    if not table.rows or table.rows[0] != ['Date', 'Open', 'High', 'Low', 'Close', 'Volume']:
+        raise ValueError('Missing or changed FT historical price table')
+    cutoff = today or datetime.now(timezone.utc).date()
+    records = {}
+    for row in table.rows[1:]:
+        if len(row) != 6:
+            raise ValueError('Invalid FT historical row')
+        match = re.match(r'[A-Za-z]+, ([A-Za-z]+ \d{1,2}, \d{4})(?:\s|$)', row[0])
+        if not match:
+            raise ValueError('Missing FT session date')
+        day = datetime.strptime(match[1], '%B %d, %Y').date()
+        if day > cutoff:
+            raise ValueError('Future FT session date')
+        if day == cutoff:
+            continue  # Today's row may still be an unfinished session.
+        opening, high, low, close = (float(value.replace(',', '')) for value in row[1:5])
+        lower, upper = (10, 2000) if kind == 'arabica' else (100, 20000)
+        if not all(math.isfinite(value) and lower < value < upper for value in (opening, high, low, close)):
+            raise ValueError('FT price outside validation bounds')
+        if not low <= opening <= high or not low <= close <= high:
+            raise ValueError('FT price outside session range')
+        key = day.isoformat()
+        if key in records and records[key] != close:
+            raise ValueError('Conflicting FT prices for the same session')
+        records[key] = close
+    if not records:
+        raise ValueError('No completed FT coffee sessions')
+    return records
+
+def ft_latest(getter, today=None):
+    a = parse_ft(getter(FT['arabica']), 'arabica', today)
+    r = parse_ft(getter(FT['robusta']), 'robusta', today)
+    if max(a) != max(r):
+        raise ValueError('FT coffee session dates differ')
+    day = max(a)
+    # FT's selected commodity series does not identify the delivery month.
+    # Never reuse a contract code from a different source or an older session.
+    return dict(date=day, arabica=a[day], robusta=r[day], contractA='', contractR='',
+                source='Financial Times / LSEG — historyczne ceny zamknięcia; seria wybrana przez dostawcę',
+                sourceUrl=FT['arabica'], sourceUrls=FT, priceType='historical_close_unspecified_contract')
+
 def download(url):
     req = Request(url, headers={'User-Agent':'CoffeeMarketDashboard/1.0 (daily public report reader)', 'Accept':'text/html,application/json'})
     with urlopen(req, timeout=30) as response:
@@ -105,30 +191,33 @@ def download(url):
         return raw.decode('utf-8-sig')
 
 def refresh(doc, getter=download, now=None):
-    stamp = (now or datetime.now(timezone.utc)).isoformat(timespec='seconds')
+    instant = now or datetime.now(timezone.utc)
+    stamp = instant.isoformat(timespec='seconds')
     doc['lastAttemptAt'] = stamp
     doc['errors'] = []
     failed = False
     doc['warnings'] = []
     latest = None
+    # Both coffee sessions have ended by 21:00 UTC; otherwise use prior days.
+    cutoff = instant.date() + timedelta(days=int(instant.hour >= 21))
+    def validate_session(record):
+        if doc.get('latest', {}).get('date', '') > record['date']:
+            raise ValueError('Source session is older than saved session; retained saved prices')
+        if (instant.date() - date.fromisoformat(record['date'])).days > 4:
+            raise ValueError('Coffee session is more than four days old')
+        return record
+    for name, fetch in (('Financial Times', ft_latest), ('Investing', investing_latest)):
+        try:
+            latest = validate_session(fetch(getter, cutoff))
+            break
+        except Exception as exc:
+            doc['warnings'].append(name + ': ' + str(exc) + '. Próba źródła zapasowego.')
     try:
-        instant = now or datetime.now(timezone.utc)
-        # Both coffee sessions have ended by 21:00 UTC; otherwise use prior days.
-        cutoff = instant.date() + timedelta(days=int(instant.hour >= 21))
-        latest = investing_latest(getter, cutoff)
-        if doc.get('latest', {}).get('date', '') > latest['date']:
-            raise ValueError('Investing session is older than saved session')
-    except Exception as exc:
-        doc['warnings'].append('Investing: ' + str(exc) + '. Próba źródła zapasowego.')
-        latest = None
-    try:
-        board, curve = parse_board(getter(SOURCE))
+        board, curve = parse_board(getter(SOURCE), instant.date())
         if curve['date'] >= doc.get('curve', {}).get('date', ''):
             doc['curve'] = curve
         if latest is None:
-            if doc.get('latest', {}).get('date', '') > board['date']:
-                raise ValueError('Backup session is older than saved session; retained saved prices')
-            latest = board
+            latest = validate_session(board)
             doc['warnings'].append('Użyto źródła zapasowego: Coffee Board of India.')
     except Exception as exc:
         if latest is None:
@@ -146,7 +235,7 @@ def refresh(doc, getter=download, now=None):
             url=f'https://api.nbp.pl/api/exchangerates/rates/a/{currency}/?format=json'
             record=json.loads(getter(url))['rates'][0]
             day=date.fromisoformat(record['effectiveDate']); rate=float(record['mid'])
-            if day>datetime.now(timezone.utc).date() or not 0<rate<100: raise ValueError('Invalid FX data')
+            if day>instant.date() or not 0<rate<100: raise ValueError('Invalid FX data')
             previous=doc['fx'].get(currency,{})
             if previous.get('date','')>day.isoformat(): raise ValueError('FX date moved backwards')
             doc['fx'][currency]=dict(rate=rate,date=day.isoformat(),no=record['no'],source='NBP tabela A')

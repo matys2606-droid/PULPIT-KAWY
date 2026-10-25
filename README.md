@@ -12,9 +12,10 @@ Nie potrzeba płatnego API ani własnego serwera.
 
 GitHub Actions sprawdza dane codziennie o **06:17 UTC** (08:17 latem / 07:17 zimą w Polsce), również przy wyłączonym komputerze. GitHub może opóźniać uruchomienia. Harmonogramy w publicznych repozytoriach mogą zostać wyłączone po 60 dniach bez aktywności; sprawdzaj historię Actions.
 
-- Kawa: publiczna tabela **Futures Price** na https://coffeeboard.gov.in/ — po trzy serie arabiki (USc/lb) i robusty (USD/t). To wtórna publikacja, nie bezpośredni feed ICE. Data sesji jest odczytywana z tabeli, nigdy z daty pobrania.
+- Kawa: publiczne tabele historyczne **Financial Times / LSEG**: [arabika](https://markets.ft.com/data/commodities/tearsheet/historical?c=Coffee%20(Arabica)) w USc/lb i [robusta](https://markets.ft.com/data/commodities/tearsheet/historical?c=Coffee%20(Robusta)) w USD/t. Pobierana jest kolumna **Close** ostatniej zakończonej sesji, a nie bieżąca cena. Oba rynki muszą mieć tę samą najnowszą datę. FT nie potwierdza tu miesiąca dostawy, więc kod kontraktu pozostaje pusty. To wtórna publikacja serii wybranej przez dostawcę, nie bezpośredni feed ICE; wartości mogą różnić się od Investing.com, również w tej samej dacie.
+- Źródła zapasowe: Investing.com (historyczne ceny zamknięcia), następnie publiczna tabela **Futures Price** na https://coffeeboard.gov.in/. Coffee Board nadal dostarcza krzywą po trzech seriach dla obu kaw, z własną datą sesji. Blokada jednego źródła nie blokuje kolejnych. Daty pochodzą ze źródła, nigdy z dnia pobrania. Źródło starsze od zapisanej sesji lub o ponad cztery dni nie może oznaczyć aktualizacji jako udanej.
 - Waluty: https://api.nbp.pl/ — USD i EUR, tabela A.
-- Historia: `data/market.json`; jedna obserwacja sesji. Zmiana kontraktu przy rolowaniu może powodować skok ceny.
+- Historia: `data/market.json`; jedna obserwacja sesji. Rolowanie kontraktów i zmiana dostawcy mogą powodować skok ceny; każda obserwacja zachowuje własne źródło. Nowy poprawny odczyt tej samej sesji zastępuje wcześniejszy, bez duplikacji.
 - Błąd źródła: poprzednie wartości zostają, pojawia się komunikat na stronie. Workflow zgłasza niepełną aktualizację po próbie publikacji ostatnich poprawnych danych.
 - Tabela może być opóźniona. Odczyty starsze niż cztery dni są oznaczane.
 
@@ -22,7 +23,7 @@ Raporty ICO/USDA, prognozy BMI/Banku Światowego, dane o zapasach oraz parametry
 
 ## Uruchomienie i testy
 
-Wymagany Python 3.12+, bez dodatkowych bibliotek.
+Wymagany Python 3.12+, bez dodatkowych bibliotek. Wynik każdej aktualizacji, źródło, data i błędy są widoczne w podsumowaniu uruchomienia GitHub Actions. Błąd pobierania nadal oznacza nieudane uruchomienie, nawet jeśli opublikowano poprzednie dane.
 
 ```sh
 python -m unittest discover -s tests -v

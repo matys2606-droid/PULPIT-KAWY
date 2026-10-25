@@ -595,7 +595,7 @@ span.sel{display:flex;align-items:center;white-space:nowrap;color:var(--muted)}
 </main>
 
 <footer class="wrap">
-  <p><b>Dane dzienne:</b> Investing.com — historyczne ceny zamknięcia (dane pochodne). Źródło zapasowe i krzywa kontraktów: <a href="https://coffeeboard.gov.in/">Coffee Board of India — publiczna tabela Futures Price</a>. Harmonogram sprawdza źródło raz dziennie. W razie błędu zachowuje ostatni prawidłowy odczyt. Nie gwarantujemy publikacji źródła w określonej godzinie.</p>
+  <p><b>Dane dzienne:</b> Financial Times / LSEG — historyczne ceny zamknięcia serii wybranej przez dostawcę. Termin dostawy nie jest potwierdzony; nie przypisujemy kodu kontraktu. Ceny mogą różnić się od Investing.com i nie są bezpośrednim feedem ICE. Investing.com pozostaje źródłem zapasowym. Kolejne źródło zapasowe i krzywa kontraktów: <a href="https://coffeeboard.gov.in/">Coffee Board of India — publiczna tabela Futures Price</a>. Harmonogram sprawdza źródło raz dziennie. W razie błędu zachowuje ostatni prawidłowy odczyt. Nie gwarantujemy publikacji źródła w określonej godzinie.</p>
   <p><b>Archiwalne źródła: weryfikacja 22.10.2026.</b> Ceny i niepełna krzywa: <a href="https://www.cocoaintel.com/coffee-pulls-back-as-london-moves-into-a-nearby-discount-20-october-2026/">CocoaIntel, sesja 20.10</a>. Raport StoneX z 21.10 jest dostępny, ale jego tabele nie dały się odczytać — nie przypisano cen z 20.10 do nowszej sesji.</p>
   <p>Średnie i zapasy: <a href="https://ico.org/documents/cy2025-26/cmr-0926-e.pdf">ICO, wrzesień 2026</a>. Bilans: <a href="https://apps.fas.usda.gov/psdonline/circulars/coffee.pdf">USDA FAS, lipiec 2026</a>. BMI: <a href="https://informistmedia.com/CommodityWire/58995/costly-brew-BMI-lifts-coffee-price-forecast-amid-tight-stocks-El-Nino-risks-in-Asia">relacja Informist</a>; brak potwierdzonej nowszej rewizji. Ceny prognozowane: <a href="https://blogs.worldbank.org/en/opendata/beverage-prices-retreat-as-supplies-recover">Bank Światowy, 07.07.2026</a>. Pogoda: <a href="https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso_advisory/ensodisc.shtml">NOAA/CPC, 08.10.2026</a>.</p>
   <p>Kursy awaryjne: USD 3,8886, EUR 4,3685 PLN, 22.10.2026, tabela 206/A/NBP/2026 — <a href="https://azfinanse.mybank.pl/kursy-walut/">publikacja kursów NBP</a>. Serwer sprawdza kursy NBP codziennie; przeglądarka dodatkowo próbuje pobrać bieżącą tabelę przy otwarciu. Gdy API NBP nie odpowiada, używane są ostatnie kursy z pliku danych serwera. <a href="https://www.biznes.gov.pl/pl/portal/00232">Podstawowa stawka VAT</a>. Koszty logistyki i parametry modelu są założeniami, nie notowaniami rynkowymi.</p>
@@ -816,8 +816,8 @@ function setSource(src){
   document.querySelectorAll('#cv-src .preset').forEach(x=>x.classList.toggle('on', x.dataset.src===src));
   const sc = scenAvg();
   const map = {
-    a:  [SPOT.a, 'clb', `Kontrakt ${SPOT.contractA}, data notowań ${SPOT.date}.`],
-    r:  [SPOT.r, 'usdt', `Kontrakt ${SPOT.contractR}, data notowań ${SPOT.rDate||SPOT.date}.`],
+    a:  [SPOT.a, 'clb', `Seria ${SPOT.contractA}, data notowań ${SPOT.date}.`],
+    r:  [SPOT.r, 'usdt', `Seria ${SPOT.contractR}, data notowań ${SPOT.rDate||SPOT.date}.`],
     sa: [Math.round(sc.a*100)/100, 'clb', 'Średnia 2027 z bieżących ustawień kalkulatora scenariuszy.'],
     sr: [Math.round(sc.r), 'usdt', 'Średnia 2027 z bieżących ustawień kalkulatora scenariuszy.'],
   }[src];
@@ -933,7 +933,7 @@ function latest(){return [...rows].sort((a,b)=>a.date.localeCompare(b.date)).at(
 function fill(x){$('market-date').value=x.date;$('market-a').value=x.arabica;$('market-r').value=x.robusta;$('market-contract-a').value=x.contractA||'';$('market-contract-r').value=x.contractR||'';$('market-source').value=x.source||'';}
 function redraw(){
  const x=latest();if(!x)return;
- SPOT.a=x.arabica;SPOT.r=x.robusta;SPOT.date=x.date.split('-').reverse().join('.');SPOT.rDate=SPOT.date;SPOT.contractA=x.contractA;SPOT.contractR=x.contractR;
+ SPOT.a=x.arabica;SPOT.r=x.robusta;SPOT.date=x.date.split('-').reverse().join('.');SPOT.rDate=SPOT.date;SPOT.contractA=x.contractA||'seria niepodana';SPOT.contractR=x.contractR||'seria niepodana';
  $('market-kpi-a').innerHTML=fmt(x.arabica)+' <span class="kpi-unit">USc/lb</span>';
  $('market-kpi-r').innerHTML=fmt(x.robusta,0)+' <span class="kpi-unit">USD/t</span>';
  const spread=x.arabica-x.robusta/22.0462;
