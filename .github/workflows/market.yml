@@ -39,11 +39,13 @@ jobs:
           import concurrent.futures, html, json, re
           from urllib.request import Request, urlopen
           urls = [
-              'https://stooq.com/q/l/?s=kc.f&f=sd2t2ohlcv&h&e=csv',
-              'https://stooq.com/q/l/?s=rc.f&f=sd2t2ohlcv&h&e=csv',
-              'https://www.investing.com/commodities/london-coffee-historical-data',
-              'https://www.barchart.com/futures/quotes/RM*0/overview',
-              'https://www.barchart.com/futures/quotes/KC*0/overview',
+              'https://markets.ft.com/data/commodities/tearsheet/historical?s=KCc1:NYB',
+              'https://markets.ft.com/data/commodities/tearsheet/historical?s=LRCc1:LIFFE',
+              'https://tradingeconomics.com/commodity/coffee',
+              'https://tradingeconomics.com/commodity/robusta-coffee',
+              'https://query1.finance.yahoo.com/v8/finance/chart/RC=F?interval=1d&range=5d',
+              'https://stooq.pl/q/?s=kc.f',
+              'https://www.google.com/search?q=robusta+coffee+historical+prices+October+23+2026',
           ]
           def probe(url):
               try:
@@ -55,8 +57,12 @@ jobs:
                       sample = html.unescape(title[1]).strip()
                       matches = re.findall(r'.{0,120}(?:lastPrice|tradeTime|symbolName|quoteOverview|data-bc-quote).{0,300}', body)
                       sample += ' | ' + ' | '.join(matches[:6])
+                      text = re.sub(r'<script\b[^>]*>.*?</script>|<style\b[^>]*>.*?</style>', '', body, flags=re.S)
+                      text = html.unescape(re.sub(r'<[^>]+>', ' ', text))
+                      text = ' '.join(text.split())
+                      sample += ' | ' + text[-7000:]
                   else:
-                      sample = body[:1200]
+                      sample = body[:3500]
                   message = url + ': ' + sample
               except Exception as exc:
                   message = url + ': ' + str(exc)
