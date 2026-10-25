@@ -1,12 +1,10 @@
 {
-  "lastAttemptAt": "2026-10-25T07:02:39+00:00",
-  "errors": [
-    "Coffee Board: Backup session is older than saved session; retained saved prices"
-  ],
+  "lastAttemptAt": "2026-10-25T22:17:47+00:00",
+  "errors": [],
   "latest": {
-    "date": "2026-10-22",
-    "arabica": 312.45,
-    "robusta": 3288.0,
+    "date": "2026-10-23",
+    "arabica": 307.45,
+    "robusta": 3228.0,
     "contractA": "KCZ26",
     "contractR": "RCX26",
     "source": "Investing.com — historyczne ceny zamknięcia (dane pochodne)",
@@ -83,9 +81,23 @@
         "robusta": "https://pl.investing.com/commodities/london-coffee-historical-data"
       },
       "priceType": "historical_close"
+    },
+    {
+      "date": "2026-10-23",
+      "arabica": 307.45,
+      "robusta": 3228.0,
+      "contractA": "KCZ26",
+      "contractR": "RCX26",
+      "source": "Investing.com — historyczne ceny zamknięcia (dane pochodne)",
+      "sourceUrl": "https://pl.investing.com/commodities/london-coffee-historical-data",
+      "sourceUrls": {
+        "arabica": "https://pl.investing.com/commodities/us-coffee-c-historical-data",
+        "robusta": "https://pl.investing.com/commodities/london-coffee-historical-data"
+      },
+      "priceType": "historical_close"
     }
   ],
-  "lastSuccessAt": "2026-10-23T07:05:06+00:00",
+  "lastSuccessAt": "2026-10-25T22:17:47+00:00",
   "fx": {
     "usd": {
       "rate": 3.9247,
@@ -101,7 +113,5 @@
     }
   },
   "schemaVersion": 1,
-  "warnings": [
-    "Investing: HTTP Error 403: Forbidden. Próba źródła zapasowego."
-  ]
+  "warnings": []
 }
