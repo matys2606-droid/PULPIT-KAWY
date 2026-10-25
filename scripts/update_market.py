@@ -167,6 +167,7 @@ def main():
     args.file.parent.mkdir(parents=True,exist_ok=True)
     temp=args.file.with_suffix('.tmp'); temp.write_text(json.dumps(doc,ensure_ascii=False,indent=2)+'\n'); temp.replace(args.file)
     print('Session:',doc['latest']['date'],'Arabica:',doc['latest']['arabica'],'Robusta:',doc['latest']['robusta'])
+    for warning in doc.get('warnings', []): print('Warning:', warning, file=sys.stderr)
     for err in doc['errors']: print(err,file=sys.stderr)
     if failed: return 1
     return 0

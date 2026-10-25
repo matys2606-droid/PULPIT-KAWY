@@ -39,30 +39,16 @@ jobs:
           import concurrent.futures, html, json, re
           from urllib.request import Request, urlopen
           urls = [
-              'https://markets.ft.com/data/commodities/tearsheet/historical?s=KCc1:NYB',
-              'https://markets.ft.com/data/commodities/tearsheet/historical?s=LRCc1:LIFFE',
               'https://tradingeconomics.com/commodity/coffee',
-              'https://tradingeconomics.com/commodity/robusta-coffee',
-              'https://query1.finance.yahoo.com/v8/finance/chart/RC=F?interval=1d&range=5d',
-              'https://stooq.pl/q/?s=kc.f',
-              'https://www.google.com/search?q=robusta+coffee+historical+prices+October+23+2026',
+              'https://tradingeconomics.com/commodity/coffee-robusta',
           ]
           def probe(url):
               try:
                   request = Request(url, headers={'User-Agent': 'CoffeeMarketDashboard/1.0 (public daily quotations)'})
                   with urlopen(request, timeout=20) as response:
                       body = response.read(2_000_000).decode('utf-8', errors='replace')
-                  title = re.search(r'<title[^>]*>(.*?)</title>', body, re.S)
-                  if title:
-                      sample = html.unescape(title[1]).strip()
-                      matches = re.findall(r'.{0,120}(?:lastPrice|tradeTime|symbolName|quoteOverview|data-bc-quote).{0,300}', body)
-                      sample += ' | ' + ' | '.join(matches[:6])
-                      text = re.sub(r'<script\b[^>]*>.*?</script>|<style\b[^>]*>.*?</style>', '', body, flags=re.S)
-                      text = html.unescape(re.sub(r'<[^>]+>', ' ', text))
-                      text = ' '.join(text.split())
-                      sample += ' | ' + text[-7000:]
-                  else:
-                      sample = body[:3500]
+                  snippets = re.findall(r'.{0,180}(?:307[.,]45|3228|3,228|2026-10-23|2026-10-2[245]|itemprop=|application/ld\+json|data-symbol|data-unit|USd/Lbs|USD/T|CFD|Robusta).{0,220}', body)
+                  sample = ' | '.join(snippets[:28])
                   message = url + ': ' + sample
               except Exception as exc:
                   message = url + ': ' + str(exc)
