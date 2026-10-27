@@ -1,42 +1,35 @@
 {
-  "lastAttemptAt": "2026-10-26T07:11:32+00:00",
-  "errors": [
-    "Coffee Board: Source session is older than saved session; retained saved prices"
-  ],
+  "lastAttemptAt": "2026-10-27T07:06:16+00:00",
+  "errors": [],
   "latest": {
-    "date": "2026-10-23",
-    "arabica": 306.0,
-    "robusta": 3224.0,
-    "contractA": "",
-    "contractR": "",
-    "source": "Financial Times / LSEG — historyczne ceny zamknięcia; seria wybrana przez dostawcę",
-    "sourceUrl": "https://markets.ft.com/data/commodities/tearsheet/historical?c=Coffee%20(Arabica)",
-    "sourceUrls": {
-      "arabica": "https://markets.ft.com/data/commodities/tearsheet/historical?c=Coffee%20(Arabica)",
-      "robusta": "https://markets.ft.com/data/commodities/tearsheet/historical?c=Coffee%20(Robusta)"
-    },
-    "priceType": "historical_close_unspecified_contract"
+    "date": "2026-10-26",
+    "arabica": 300.95,
+    "robusta": 3194.0,
+    "contractA": "KCZ26",
+    "contractR": "RCX26",
+    "source": "Coffee Board of India — Futures Price",
+    "sourceUrl": "https://coffeeboard.gov.in/"
   },
   "curve": {
-    "date": "2026-10-21",
+    "date": "2026-10-26",
     "arabica": [
       {
         "delivery": "2026-12",
         "label": "Dec-2026",
         "contract": "KCZ26",
-        "price": 316.15
+        "price": 300.95
       },
       {
         "delivery": "2027-03",
         "label": "Mar-2027",
         "contract": "KCH27",
-        "price": 301.25
+        "price": 285.2
       },
       {
         "delivery": "2027-05",
         "label": "May-2027",
         "contract": "KCK27",
-        "price": 296.2
+        "price": 280.65
       }
     ],
     "robusta": [
@@ -44,19 +37,19 @@
         "delivery": "2026-11",
         "label": "Nov-2026",
         "contract": "RCX26",
-        "price": 3352.0
+        "price": 3194.0
       },
       {
         "delivery": "2027-01",
         "label": "Jan-2027",
         "contract": "RCF27",
-        "price": 3364.0
+        "price": 3201.0
       },
       {
         "delivery": "2027-03",
         "label": "Mar-2027",
         "contract": "RCH27",
-        "price": 3344.0
+        "price": 3188.0
       }
     ]
   },
@@ -97,26 +90,36 @@
         "robusta": "https://markets.ft.com/data/commodities/tearsheet/historical?c=Coffee%20(Robusta)"
       },
       "priceType": "historical_close_unspecified_contract"
+    },
+    {
+      "date": "2026-10-26",
+      "arabica": 300.95,
+      "robusta": 3194.0,
+      "contractA": "KCZ26",
+      "contractR": "RCX26",
+      "source": "Coffee Board of India — Futures Price",
+      "sourceUrl": "https://coffeeboard.gov.in/"
     }
   ],
-  "lastSuccessAt": "2026-10-25T22:33:05+00:00",
+  "lastSuccessAt": "2026-10-27T07:06:16+00:00",
   "fx": {
     "usd": {
-      "rate": 3.9247,
-      "date": "2026-10-23",
-      "no": "207/A/NBP/2026",
+      "rate": 3.9293,
+      "date": "2026-10-26",
+      "no": "208/A/NBP/2026",
       "source": "NBP tabela A"
     },
     "eur": {
-      "rate": 4.3917,
-      "date": "2026-10-23",
-      "no": "207/A/NBP/2026",
+      "rate": 4.4026,
+      "date": "2026-10-26",
+      "no": "208/A/NBP/2026",
       "source": "NBP tabela A"
     }
   },
   "schemaVersion": 1,
   "warnings": [
     "Financial Times: FT coffee session dates differ. Próba źródła zapasowego.",
-    "Investing: HTTP Error 403: Forbidden. Próba źródła zapasowego."
+    "Investing: HTTP Error 403: Forbidden. Próba źródła zapasowego.",
+    "Użyto źródła zapasowego: Coffee Board of India."
   ]
 }
