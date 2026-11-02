@@ -1,10 +1,10 @@
 {
-  "lastAttemptAt": "2026-11-01T07:21:07+00:00",
+  "lastAttemptAt": "2026-11-02T07:44:21+00:00",
   "errors": [],
   "latest": {
     "date": "2026-10-30",
     "arabica": 287.15,
-    "robusta": 3215.0,
+    "robusta": 3219.0,
     "contractA": "",
     "contractR": "",
     "source": "Financial Times / LSEG — historyczne ceny zamknięcia; seria wybrana przez dostawcę",
@@ -16,25 +16,25 @@
     "priceType": "historical_close_unspecified_contract"
   },
   "curve": {
-    "date": "2026-10-27",
+    "date": "2026-10-30",
     "arabica": [
       {
         "delivery": "2026-12",
         "label": "Dec-2026",
         "contract": "KCZ26",
-        "price": 286.75
+        "price": 287.2
       },
       {
         "delivery": "2027-03",
         "label": "Mar-2027",
         "contract": "KCH27",
-        "price": 276.2
+        "price": 276.8
       },
       {
         "delivery": "2027-05",
         "label": "May-2027",
         "contract": "KCK27",
-        "price": 272.25
+        "price": 272.75
       }
     ],
     "robusta": [
@@ -42,19 +42,19 @@
         "delivery": "2026-11",
         "label": "Nov-2026",
         "contract": "RCX26",
-        "price": 3200.0
+        "price": 3219.0
       },
       {
         "delivery": "2027-01",
         "label": "Jan-2027",
         "contract": "RCF27",
-        "price": 3199.0
+        "price": 3204.0
       },
       {
         "delivery": "2027-03",
         "label": "Mar-2027",
         "contract": "RCH27",
-        "price": 3183.0
+        "price": 3193.0
       }
     ]
   },
@@ -145,7 +145,7 @@
     {
       "date": "2026-10-30",
       "arabica": 287.15,
-      "robusta": 3215.0,
+      "robusta": 3219.0,
       "contractA": "",
       "contractR": "",
       "source": "Financial Times / LSEG — historyczne ceny zamknięcia; seria wybrana przez dostawcę",
@@ -157,7 +157,7 @@
       "priceType": "historical_close_unspecified_contract"
     }
   ],
-  "lastSuccessAt": "2026-11-01T07:21:07+00:00",
+  "lastSuccessAt": "2026-11-02T07:44:21+00:00",
   "fx": {
     "usd": {
       "rate": 3.9251,
@@ -173,7 +173,5 @@
     }
   },
   "schemaVersion": 1,
-  "warnings": [
-    "Krzywa kontraktów Coffee Board: Invalid delivery month"
-  ]
+  "warnings": []
 }
