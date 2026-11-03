@@ -1,10 +1,10 @@
 {
-  "lastAttemptAt": "2026-11-02T07:44:21+00:00",
+  "lastAttemptAt": "2026-11-03T07:31:45+00:00",
   "errors": [],
   "latest": {
-    "date": "2026-10-30",
-    "arabica": 287.15,
-    "robusta": 3219.0,
+    "date": "2026-11-02",
+    "arabica": 294.15,
+    "robusta": 3256.0,
     "contractA": "",
     "contractR": "",
     "source": "Financial Times / LSEG — historyczne ceny zamknięcia; seria wybrana przez dostawcę",
@@ -16,25 +16,25 @@
     "priceType": "historical_close_unspecified_contract"
   },
   "curve": {
-    "date": "2026-10-30",
+    "date": "2026-11-02",
     "arabica": [
       {
         "delivery": "2026-12",
         "label": "Dec-2026",
         "contract": "KCZ26",
-        "price": 287.2
+        "price": 292.1
       },
       {
         "delivery": "2027-03",
         "label": "Mar-2027",
         "contract": "KCH27",
-        "price": 276.8
+        "price": 280.55
       },
       {
         "delivery": "2027-05",
         "label": "May-2027",
         "contract": "KCK27",
-        "price": 272.75
+        "price": 276.5
       }
     ],
     "robusta": [
@@ -42,19 +42,19 @@
         "delivery": "2026-11",
         "label": "Nov-2026",
         "contract": "RCX26",
-        "price": 3219.0
+        "price": 3256.0
       },
       {
         "delivery": "2027-01",
         "label": "Jan-2027",
         "contract": "RCF27",
-        "price": 3204.0
+        "price": 3241.0
       },
       {
         "delivery": "2027-03",
         "label": "Mar-2027",
         "contract": "RCH27",
-        "price": 3193.0
+        "price": 3227.0
       }
     ]
   },
@@ -155,20 +155,34 @@
         "robusta": "https://markets.ft.com/data/commodities/tearsheet/historical?c=Coffee%20(Robusta)"
       },
       "priceType": "historical_close_unspecified_contract"
+    },
+    {
+      "date": "2026-11-02",
+      "arabica": 294.15,
+      "robusta": 3256.0,
+      "contractA": "",
+      "contractR": "",
+      "source": "Financial Times / LSEG — historyczne ceny zamknięcia; seria wybrana przez dostawcę",
+      "sourceUrl": "https://markets.ft.com/data/commodities/tearsheet/historical?c=Coffee%20(Arabica)",
+      "sourceUrls": {
+        "arabica": "https://markets.ft.com/data/commodities/tearsheet/historical?c=Coffee%20(Arabica)",
+        "robusta": "https://markets.ft.com/data/commodities/tearsheet/historical?c=Coffee%20(Robusta)"
+      },
+      "priceType": "historical_close_unspecified_contract"
     }
   ],
-  "lastSuccessAt": "2026-11-02T07:44:21+00:00",
+  "lastSuccessAt": "2026-11-03T07:31:45+00:00",
   "fx": {
     "usd": {
-      "rate": 3.9251,
-      "date": "2026-10-30",
-      "no": "212/A/NBP/2026",
+      "rate": 3.9389,
+      "date": "2026-11-02",
+      "no": "213/A/NBP/2026",
       "source": "NBP tabela A"
     },
     "eur": {
-      "rate": 4.3955,
-      "date": "2026-10-30",
-      "no": "212/A/NBP/2026",
+      "rate": 4.4185,
+      "date": "2026-11-02",
+      "no": "213/A/NBP/2026",
       "source": "NBP tabela A"
     }
   },
