@@ -1,19 +1,19 @@
 {
-  "lastAttemptAt": "2026-11-03T07:31:45+00:00",
+  "lastAttemptAt": "2026-11-04T07:36:06+00:00",
   "errors": [],
   "latest": {
-    "date": "2026-11-02",
-    "arabica": 294.15,
-    "robusta": 3256.0,
-    "contractA": "",
-    "contractR": "",
-    "source": "Financial Times / LSEG — historyczne ceny zamknięcia; seria wybrana przez dostawcę",
-    "sourceUrl": "https://markets.ft.com/data/commodities/tearsheet/historical?c=Coffee%20(Arabica)",
+    "date": "2026-11-03",
+    "arabica": 283.95,
+    "robusta": 3210.0,
+    "contractA": "KCZ26",
+    "contractR": "RCF27",
+    "source": "Investing.com — historyczne ceny zamknięcia (dane pochodne)",
+    "sourceUrl": "https://pl.investing.com/commodities/london-coffee-historical-data",
     "sourceUrls": {
-      "arabica": "https://markets.ft.com/data/commodities/tearsheet/historical?c=Coffee%20(Arabica)",
-      "robusta": "https://markets.ft.com/data/commodities/tearsheet/historical?c=Coffee%20(Robusta)"
+      "arabica": "https://pl.investing.com/commodities/us-coffee-c-historical-data",
+      "robusta": "https://pl.investing.com/commodities/london-coffee-historical-data"
     },
-    "priceType": "historical_close_unspecified_contract"
+    "priceType": "historical_close"
   },
   "curve": {
     "date": "2026-11-02",
@@ -169,23 +169,39 @@
         "robusta": "https://markets.ft.com/data/commodities/tearsheet/historical?c=Coffee%20(Robusta)"
       },
       "priceType": "historical_close_unspecified_contract"
+    },
+    {
+      "date": "2026-11-03",
+      "arabica": 283.95,
+      "robusta": 3210.0,
+      "contractA": "KCZ26",
+      "contractR": "RCF27",
+      "source": "Investing.com — historyczne ceny zamknięcia (dane pochodne)",
+      "sourceUrl": "https://pl.investing.com/commodities/london-coffee-historical-data",
+      "sourceUrls": {
+        "arabica": "https://pl.investing.com/commodities/us-coffee-c-historical-data",
+        "robusta": "https://pl.investing.com/commodities/london-coffee-historical-data"
+      },
+      "priceType": "historical_close"
     }
   ],
-  "lastSuccessAt": "2026-11-03T07:31:45+00:00",
+  "lastSuccessAt": "2026-11-04T07:36:06+00:00",
   "fx": {
     "usd": {
-      "rate": 3.9389,
-      "date": "2026-11-02",
-      "no": "213/A/NBP/2026",
+      "rate": 3.9526,
+      "date": "2026-11-03",
+      "no": "214/A/NBP/2026",
       "source": "NBP tabela A"
     },
     "eur": {
-      "rate": 4.4185,
-      "date": "2026-11-02",
-      "no": "213/A/NBP/2026",
+      "rate": 4.4233,
+      "date": "2026-11-03",
+      "no": "214/A/NBP/2026",
       "source": "NBP tabela A"
     }
   },
   "schemaVersion": 1,
-  "warnings": []
+  "warnings": [
+    "Financial Times: FT coffee session dates differ. Próba źródła zapasowego."
+  ]
 }
