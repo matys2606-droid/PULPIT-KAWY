@@ -1,5 +1,5 @@
 {
-  "lastAttemptAt": "2026-11-07T07:21:33+00:00",
+  "lastAttemptAt": "2026-11-08T07:23:44+00:00",
   "errors": [],
   "latest": {
     "date": "2026-11-06",
@@ -222,7 +222,7 @@
       "priceType": "historical_close"
     }
   ],
-  "lastSuccessAt": "2026-11-07T07:21:33+00:00",
+  "lastSuccessAt": "2026-11-08T07:23:44+00:00",
   "fx": {
     "usd": {
       "rate": 3.9321,
