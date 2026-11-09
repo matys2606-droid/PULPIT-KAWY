@@ -138,6 +138,19 @@ span.sel{display:flex;align-items:center;white-space:nowrap;color:var(--muted)}
 
   <!-- RYNEK -->
   <section class="panel active" id="rynek">
+    <div class="card" style="margin-bottom:16px">
+      <h3>Co się zmieniło?</h3>
+      <p class="small" id="market-change-meta">Wczytywanie danych sesji…</p>
+      <p class="small" id="market-change-dates"></p>
+      <table>
+        <thead><tr><th scope="col">Kawa</th><th scope="col">Od poprzedniej zapisanej sesji</th><th scope="col">Tydzień</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Arabica</th><td id="market-change-a-day">—</td><td id="market-change-a-week">—</td></tr>
+          <tr><th scope="row">Robusta</th><td id="market-change-r-day">—</td><td id="market-change-r-week">—</td></tr>
+        </tbody>
+      </table>
+      <p class="small" id="market-change-fx"></p>
+    </div>
     <div class="card" id="market-update" style="margin-bottom:16px">
       <h3>Aktualizacja notowań ICE i wykresów</h3>
       <p class="small">Serwer raz dziennie pobiera historyczne ceny zamknięcia Investing.com. Przy błędzie korzysta z Coffee Board of India. Krzywa dalszych kontraktów pochodzi z Coffee Board, kursy walut z NBP. Wyświetlamy datę sesji źródłowej, która może być wcześniejsza od dnia sprawdzenia. Własne notowania i CSV zapisują się tylko w tej przeglądarce.</p>
@@ -977,6 +990,37 @@ load();fill(latest());redraw();
 </script>
 
 <script>
+function renderMarketChanges(doc, updateTime){
+ const current=doc.latest;
+ const earlier=doc.history.filter(row=>row.date<current.date).sort((a,b)=>b.date.localeCompare(a.date));
+ const weekCutoff=new Date(Date.parse(current.date+'T00:00:00Z')-7*86400000).toISOString().slice(0,10);
+ const previous=earlier[0];
+ const week=earlier.find(row=>row.date<=weekCutoff);
+ const fx=doc.fx?.usd;
+ const hasFx=Number.isFinite(fx?.rate)&&fx.rate>0;
+ const signed=(value,digits)=>(value>0?'+':'')+fmt(value,digits);
+
+ const stale=Date.now()-Date.parse(current.date+'T00:00:00Z')>4*86400000;
+ el('market-change-meta').textContent='Sesja: '+current.date+' • Źródło: '+(current.source||'brak')+' • Próba aktualizacji: '+updateTime+'.'+(stale?' Dane sesji mają ponad 4 dni.':'');
+ el('market-change-dates').textContent='Daty porównania: '+(previous?.date||'brak poprzedniej sesji')+' / '+(week?.date||'brak sesji sprzed co najmniej 7 dni')+'.';
+ el('market-change-fx').textContent=hasFx
+  ? 'Obie ceny przeliczono po tym samym kursie NBP ('+fmt(fx.rate,4)+' PLN/USD, '+fx.date+'). Wynik w PLN/kg pokazuje wpływ zmiany ceny kawy przy stałym kursie dolara.'
+  : 'Brak kursu USD/PLN do przeliczenia.';
+ for(const [label,price,contract,usdPerKg] of [
+  ['a','arabica','contractA',0.01/0.45359237],
+  ['r','robusta','contractR',0.001]
+ ]){
+  for(const [period,base] of [['day',previous],['week',week]]){
+   const cell=el('market-change-'+label+'-'+period);
+   if(!base){cell.textContent='Brak danych';continue;}
+   if(!current[contract]||!base[contract]){cell.textContent='Nieznana seria kontraktu';continue;}
+   if(current[contract]!==base[contract]){cell.textContent='Zmiana serii ('+base[contract]+' → '+current[contract]+')';continue;}
+   const change=current[price]-base[price];
+   cell.textContent=signed(100*change/base[price],2)+'%'+(hasFx?' / '+signed(change*usdPerKg*fx.rate,2)+' PLN/kg':'');
+  }
+ }
+}
+
 function applySnapshot(doc){
  if(doc.schemaVersion!==1||!doc.latest||!Array.isArray(doc.history)||!doc.curve)throw Error('Błędny format danych serwera');
  window.applyOfficialHistory(doc.history);
@@ -1018,6 +1062,7 @@ function applySnapshot(doc){
  if(age>4)note+=' UWAGA: źródło zawiera dane starsze niż 4 dni.';
  if(doc.warnings?.length)note+=' '+doc.warnings.join(' | ');
  if(doc.errors?.length)note+=' Ostatnia aktualizacja była niepełna; zachowano wcześniejsze dane. Szczegóły: '+doc.errors.join(' | ');
+ renderMarketChanges(doc,time(doc.lastAttemptAt));
  el('snapshot-meta').textContent=note+' Raporty ICO, USDA, BMI i prognozy mają osobne daty i nie są aktualizowane codziennie.';
 }
 try{applySnapshot(MARKET_SNAPSHOT);}catch(e){el('snapshot-meta').textContent='Błąd danych początkowych: '+e.message;}
