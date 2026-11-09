@@ -1,5 +1,5 @@
 {
-  "lastAttemptAt": "2026-11-08T07:23:44+00:00",
+  "lastAttemptAt": "2026-11-09T07:46:51+00:00",
   "errors": [],
   "latest": {
     "date": "2026-11-06",
@@ -16,25 +16,25 @@
     "priceType": "historical_close"
   },
   "curve": {
-    "date": "2026-11-05",
+    "date": "2026-11-06",
     "arabica": [
       {
         "delivery": "2026-12",
         "label": "Dec-2026",
         "contract": "KCZ26",
-        "price": 277.15
+        "price": 280.0
       },
       {
         "delivery": "2027-03",
         "label": "Mar-2027",
         "contract": "KCH27",
-        "price": 269.25
+        "price": 271.65
       },
       {
         "delivery": "2027-05",
         "label": "May-2027",
         "contract": "KCK27",
-        "price": 265.65
+        "price": 267.7
       }
     ],
     "robusta": [
@@ -42,19 +42,19 @@
         "delivery": "2026-11",
         "label": "Nov-2026",
         "contract": "RCX26",
-        "price": 3256.0
+        "price": 3285.0
       },
       {
         "delivery": "2027-01",
         "label": "Jan-2027",
         "contract": "RCF27",
-        "price": 3241.0
+        "price": 3270.0
       },
       {
         "delivery": "2027-03",
         "label": "Mar-2027",
         "contract": "RCH27",
-        "price": 3219.0
+        "price": 3243.0
       }
     ]
   },
@@ -222,7 +222,7 @@
       "priceType": "historical_close"
     }
   ],
-  "lastSuccessAt": "2026-11-08T07:23:44+00:00",
+  "lastSuccessAt": "2026-11-09T07:46:51+00:00",
   "fx": {
     "usd": {
       "rate": 3.9321,
