@@ -1,10 +1,10 @@
 {
-  "lastAttemptAt": "2026-11-09T07:46:51+00:00",
+  "lastAttemptAt": "2026-11-09T22:15:26+00:00",
   "errors": [],
   "latest": {
-    "date": "2026-11-06",
-    "arabica": 280.0,
-    "robusta": 3270.0,
+    "date": "2026-11-09",
+    "arabica": 273.05,
+    "robusta": 3264.0,
     "contractA": "KCZ26",
     "contractR": "RCF27",
     "source": "Investing.com — historyczne ceny zamknięcia (dane pochodne)",
@@ -220,20 +220,34 @@
         "robusta": "https://pl.investing.com/commodities/london-coffee-historical-data"
       },
       "priceType": "historical_close"
+    },
+    {
+      "date": "2026-11-09",
+      "arabica": 273.05,
+      "robusta": 3264.0,
+      "contractA": "KCZ26",
+      "contractR": "RCF27",
+      "source": "Investing.com — historyczne ceny zamknięcia (dane pochodne)",
+      "sourceUrl": "https://pl.investing.com/commodities/london-coffee-historical-data",
+      "sourceUrls": {
+        "arabica": "https://pl.investing.com/commodities/us-coffee-c-historical-data",
+        "robusta": "https://pl.investing.com/commodities/london-coffee-historical-data"
+      },
+      "priceType": "historical_close"
     }
   ],
-  "lastSuccessAt": "2026-11-09T07:46:51+00:00",
+  "lastSuccessAt": "2026-11-09T22:15:26+00:00",
   "fx": {
     "usd": {
-      "rate": 3.9321,
-      "date": "2026-11-06",
-      "no": "217/A/NBP/2026",
+      "rate": 3.9199,
+      "date": "2026-11-09",
+      "no": "218/A/NBP/2026",
       "source": "NBP tabela A"
     },
     "eur": {
-      "rate": 4.3925,
-      "date": "2026-11-06",
-      "no": "217/A/NBP/2026",
+      "rate": 4.3873,
+      "date": "2026-11-09",
+      "no": "218/A/NBP/2026",
       "source": "NBP tabela A"
     }
   },
