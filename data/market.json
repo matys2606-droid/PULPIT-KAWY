@@ -1,10 +1,10 @@
 {
-  "lastAttemptAt": "2026-11-09T22:15:26+00:00",
+  "lastAttemptAt": "2026-11-10T07:30:06+00:00",
   "errors": [],
   "latest": {
     "date": "2026-11-09",
-    "arabica": 273.05,
-    "robusta": 3264.0,
+    "arabica": 273.6,
+    "robusta": 3267.0,
     "contractA": "KCZ26",
     "contractR": "RCF27",
     "source": "Investing.com — historyczne ceny zamknięcia (dane pochodne)",
@@ -16,25 +16,25 @@
     "priceType": "historical_close"
   },
   "curve": {
-    "date": "2026-11-06",
+    "date": "2026-11-09",
     "arabica": [
       {
         "delivery": "2026-12",
         "label": "Dec-2026",
         "contract": "KCZ26",
-        "price": 280.0
+        "price": 273.6
       },
       {
         "delivery": "2027-03",
         "label": "Mar-2027",
         "contract": "KCH27",
-        "price": 271.65
+        "price": 267.25
       },
       {
         "delivery": "2027-05",
         "label": "May-2027",
         "contract": "KCK27",
-        "price": 267.7
+        "price": 263.15
       }
     ],
     "robusta": [
@@ -42,19 +42,19 @@
         "delivery": "2026-11",
         "label": "Nov-2026",
         "contract": "RCX26",
-        "price": 3285.0
+        "price": 3282.0
       },
       {
         "delivery": "2027-01",
         "label": "Jan-2027",
         "contract": "RCF27",
-        "price": 3270.0
+        "price": 3267.0
       },
       {
         "delivery": "2027-03",
         "label": "Mar-2027",
         "contract": "RCH27",
-        "price": 3243.0
+        "price": 3238.0
       }
     ]
   },
@@ -223,8 +223,8 @@
     },
     {
       "date": "2026-11-09",
-      "arabica": 273.05,
-      "robusta": 3264.0,
+      "arabica": 273.6,
+      "robusta": 3267.0,
       "contractA": "KCZ26",
       "contractR": "RCF27",
       "source": "Investing.com — historyczne ceny zamknięcia (dane pochodne)",
@@ -236,7 +236,7 @@
       "priceType": "historical_close"
     }
   ],
-  "lastSuccessAt": "2026-11-09T22:15:26+00:00",
+  "lastSuccessAt": "2026-11-10T07:30:06+00:00",
   "fx": {
     "usd": {
       "rate": 3.9199,
