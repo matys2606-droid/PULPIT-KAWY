@@ -1,19 +1,14 @@
 {
-  "lastAttemptAt": "2026-11-13T07:37:28+00:00",
+  "lastAttemptAt": "2026-11-14T07:25:05+00:00",
   "errors": [],
   "latest": {
     "date": "2026-11-12",
     "arabica": 280.2,
-    "robusta": 3207.0,
+    "robusta": 3222.0,
     "contractA": "KCZ26",
-    "contractR": "RCF27",
-    "source": "Investing.com — historyczne ceny zamknięcia (dane pochodne)",
-    "sourceUrl": "https://pl.investing.com/commodities/london-coffee-historical-data",
-    "sourceUrls": {
-      "arabica": "https://pl.investing.com/commodities/us-coffee-c-historical-data",
-      "robusta": "https://pl.investing.com/commodities/london-coffee-historical-data"
-    },
-    "priceType": "historical_close"
+    "contractR": "RCX26",
+    "source": "Coffee Board of India — Futures Price",
+    "sourceUrl": "https://coffeeboard.gov.in/"
   },
   "curve": {
     "date": "2026-11-12",
@@ -266,35 +261,32 @@
     {
       "date": "2026-11-12",
       "arabica": 280.2,
-      "robusta": 3207.0,
+      "robusta": 3222.0,
       "contractA": "KCZ26",
-      "contractR": "RCF27",
-      "source": "Investing.com — historyczne ceny zamknięcia (dane pochodne)",
-      "sourceUrl": "https://pl.investing.com/commodities/london-coffee-historical-data",
-      "sourceUrls": {
-        "arabica": "https://pl.investing.com/commodities/us-coffee-c-historical-data",
-        "robusta": "https://pl.investing.com/commodities/london-coffee-historical-data"
-      },
-      "priceType": "historical_close"
+      "contractR": "RCX26",
+      "source": "Coffee Board of India — Futures Price",
+      "sourceUrl": "https://coffeeboard.gov.in/"
     }
   ],
-  "lastSuccessAt": "2026-11-13T07:37:28+00:00",
+  "lastSuccessAt": "2026-11-14T07:25:05+00:00",
   "fx": {
     "usd": {
-      "rate": 3.9676,
-      "date": "2026-11-12",
-      "no": "220/A/NBP/2026",
+      "rate": 3.9852,
+      "date": "2026-11-13",
+      "no": "221/A/NBP/2026",
       "source": "NBP tabela A"
     },
     "eur": {
-      "rate": 4.4018,
-      "date": "2026-11-12",
-      "no": "220/A/NBP/2026",
+      "rate": 4.407,
+      "date": "2026-11-13",
+      "no": "221/A/NBP/2026",
       "source": "NBP tabela A"
     }
   },
   "schemaVersion": 1,
   "warnings": [
-    "Financial Times: FT price outside session range. Próba źródła zapasowego."
+    "Financial Times: FT price outside session range. Próba źródła zapasowego.",
+    "Investing: HTTP Error 403: Forbidden. Próba źródła zapasowego.",
+    "Użyto źródła zapasowego: Coffee Board of India."
   ]
 }
