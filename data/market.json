@@ -1,37 +1,35 @@
 {
-  "lastAttemptAt": "2026-11-16T09:04:47+00:00",
-  "errors": [
-    "Coffee Board: Invalid delivery month"
-  ],
+  "lastAttemptAt": "2026-11-17T07:39:17+00:00",
+  "errors": [],
   "latest": {
-    "date": "2026-11-12",
-    "arabica": 280.2,
-    "robusta": 3222.0,
+    "date": "2026-11-16",
+    "arabica": 280.7,
+    "robusta": 3159.0,
     "contractA": "KCZ26",
     "contractR": "RCX26",
     "source": "Coffee Board of India — Futures Price",
     "sourceUrl": "https://coffeeboard.gov.in/"
   },
   "curve": {
-    "date": "2026-11-12",
+    "date": "2026-11-16",
     "arabica": [
       {
         "delivery": "2026-12",
         "label": "Dec-2026",
         "contract": "KCZ26",
-        "price": 280.2
+        "price": 280.7
       },
       {
         "delivery": "2027-03",
         "label": "Mar-2027",
         "contract": "KCH27",
-        "price": 274.55
+        "price": 274.9
       },
       {
         "delivery": "2027-05",
         "label": "May-2027",
         "contract": "KCK27",
-        "price": 270.15
+        "price": 270.55
       }
     ],
     "robusta": [
@@ -39,19 +37,19 @@
         "delivery": "2026-11",
         "label": "Nov-2026",
         "contract": "RCX26",
-        "price": 3222.0
+        "price": 3159.0
       },
       {
         "delivery": "2027-01",
         "label": "Jan-2027",
         "contract": "RCF27",
-        "price": 3207.0
+        "price": 3144.0
       },
       {
         "delivery": "2027-03",
         "label": "Mar-2027",
         "contract": "RCH27",
-        "price": 3189.0
+        "price": 3123.0
       }
     ]
   },
@@ -268,26 +266,36 @@
       "contractR": "RCX26",
       "source": "Coffee Board of India — Futures Price",
       "sourceUrl": "https://coffeeboard.gov.in/"
+    },
+    {
+      "date": "2026-11-16",
+      "arabica": 280.7,
+      "robusta": 3159.0,
+      "contractA": "KCZ26",
+      "contractR": "RCX26",
+      "source": "Coffee Board of India — Futures Price",
+      "sourceUrl": "https://coffeeboard.gov.in/"
     }
   ],
-  "lastSuccessAt": "2026-11-15T07:26:38+00:00",
+  "lastSuccessAt": "2026-11-17T07:39:17+00:00",
   "fx": {
     "usd": {
-      "rate": 3.9852,
-      "date": "2026-11-13",
-      "no": "221/A/NBP/2026",
+      "rate": 4.0007,
+      "date": "2026-11-16",
+      "no": "222/A/NBP/2026",
       "source": "NBP tabela A"
     },
     "eur": {
-      "rate": 4.407,
-      "date": "2026-11-13",
-      "no": "221/A/NBP/2026",
+      "rate": 4.4048,
+      "date": "2026-11-16",
+      "no": "222/A/NBP/2026",
       "source": "NBP tabela A"
     }
   },
   "schemaVersion": 1,
   "warnings": [
     "Financial Times: FT price outside session range. Próba źródła zapasowego.",
-    "Investing: HTTP Error 403: Forbidden. Próba źródła zapasowego."
+    "Investing: HTTP Error 403: Forbidden. Próba źródła zapasowego.",
+    "Użyto źródła zapasowego: Coffee Board of India."
   ]
 }
