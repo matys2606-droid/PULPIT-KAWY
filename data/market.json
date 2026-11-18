@@ -1,6 +1,8 @@
 {
-  "lastAttemptAt": "2026-11-17T07:39:17+00:00",
-  "errors": [],
+  "lastAttemptAt": "2026-11-18T07:38:34+00:00",
+  "errors": [
+    "Coffee Board: Invalid delivery month"
+  ],
   "latest": {
     "date": "2026-11-16",
     "arabica": 280.7,
@@ -280,22 +282,21 @@
   "lastSuccessAt": "2026-11-17T07:39:17+00:00",
   "fx": {
     "usd": {
-      "rate": 4.0007,
-      "date": "2026-11-16",
-      "no": "222/A/NBP/2026",
+      "rate": 4.0022,
+      "date": "2026-11-17",
+      "no": "223/A/NBP/2026",
       "source": "NBP tabela A"
     },
     "eur": {
-      "rate": 4.4048,
-      "date": "2026-11-16",
-      "no": "222/A/NBP/2026",
+      "rate": 4.4032,
+      "date": "2026-11-17",
+      "no": "223/A/NBP/2026",
       "source": "NBP tabela A"
     }
   },
   "schemaVersion": 1,
   "warnings": [
     "Financial Times: FT price outside session range. Próba źródła zapasowego.",
-    "Investing: HTTP Error 403: Forbidden. Próba źródła zapasowego.",
-    "Użyto źródła zapasowego: Coffee Board of India."
+    "Investing: HTTP Error 403: Forbidden. Próba źródła zapasowego."
   ]
 }
