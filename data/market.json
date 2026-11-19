@@ -1,5 +1,5 @@
 {
-  "lastAttemptAt": "2026-11-18T07:38:34+00:00",
+  "lastAttemptAt": "2026-11-19T07:40:07+00:00",
   "errors": [
     "Coffee Board: Invalid delivery month"
   ],
@@ -282,15 +282,15 @@
   "lastSuccessAt": "2026-11-17T07:39:17+00:00",
   "fx": {
     "usd": {
-      "rate": 4.0022,
-      "date": "2026-11-17",
-      "no": "223/A/NBP/2026",
+      "rate": 4.017,
+      "date": "2026-11-18",
+      "no": "224/A/NBP/2026",
       "source": "NBP tabela A"
     },
     "eur": {
-      "rate": 4.4032,
-      "date": "2026-11-17",
-      "no": "223/A/NBP/2026",
+      "rate": 4.4089,
+      "date": "2026-11-18",
+      "no": "224/A/NBP/2026",
       "source": "NBP tabela A"
     }
   },
