@@ -1,19 +1,17 @@
 {
-  "lastAttemptAt": "2026-11-20T07:39:28+00:00",
-  "errors": [],
+  "lastAttemptAt": "2026-11-21T07:30:41+00:00",
+  "errors": [
+    "NBP USD: HTTP Error 500: Internal Server Error",
+    "NBP EUR: HTTP Error 500: Internal Server Error"
+  ],
   "latest": {
     "date": "2026-11-19",
-    "arabica": 276.0,
-    "robusta": 2978.0,
-    "contractA": "KCH27",
-    "contractR": "RCF27",
-    "source": "Investing.com — historyczne ceny zamknięcia (dane pochodne)",
-    "sourceUrl": "https://pl.investing.com/commodities/london-coffee-historical-data",
-    "sourceUrls": {
-      "arabica": "https://pl.investing.com/commodities/us-coffee-c-historical-data",
-      "robusta": "https://pl.investing.com/commodities/london-coffee-historical-data"
-    },
-    "priceType": "historical_close"
+    "arabica": 282.05,
+    "robusta": 2998.0,
+    "contractA": "KCZ26",
+    "contractR": "RCX26",
+    "source": "Coffee Board of India — Futures Price",
+    "sourceUrl": "https://coffeeboard.gov.in/"
   },
   "curve": {
     "date": "2026-11-19",
@@ -283,20 +281,15 @@
     },
     {
       "date": "2026-11-19",
-      "arabica": 276.0,
-      "robusta": 2978.0,
-      "contractA": "KCH27",
-      "contractR": "RCF27",
-      "source": "Investing.com — historyczne ceny zamknięcia (dane pochodne)",
-      "sourceUrl": "https://pl.investing.com/commodities/london-coffee-historical-data",
-      "sourceUrls": {
-        "arabica": "https://pl.investing.com/commodities/us-coffee-c-historical-data",
-        "robusta": "https://pl.investing.com/commodities/london-coffee-historical-data"
-      },
-      "priceType": "historical_close"
+      "arabica": 282.05,
+      "robusta": 2998.0,
+      "contractA": "KCZ26",
+      "contractR": "RCX26",
+      "source": "Coffee Board of India — Futures Price",
+      "sourceUrl": "https://coffeeboard.gov.in/"
     }
   ],
-  "lastSuccessAt": "2026-11-20T07:39:28+00:00",
+  "lastSuccessAt": "2026-11-21T07:30:41+00:00",
   "fx": {
     "usd": {
       "rate": 4.0176,
@@ -313,6 +306,8 @@
   },
   "schemaVersion": 1,
   "warnings": [
-    "Financial Times: FT price outside session range. Próba źródła zapasowego."
+    "Financial Times: FT price outside session range. Próba źródła zapasowego.",
+    "Investing: HTTP Error 403: Forbidden. Próba źródła zapasowego.",
+    "Użyto źródła zapasowego: Coffee Board of India."
   ]
 }
