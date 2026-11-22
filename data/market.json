@@ -1,8 +1,7 @@
 {
-  "lastAttemptAt": "2026-11-21T07:30:41+00:00",
+  "lastAttemptAt": "2026-11-22T07:30:31+00:00",
   "errors": [
-    "NBP USD: HTTP Error 500: Internal Server Error",
-    "NBP EUR: HTTP Error 500: Internal Server Error"
+    "NBP EUR: HTTP Error 404: Not Found"
   ],
   "latest": {
     "date": "2026-11-19",
@@ -289,12 +288,12 @@
       "sourceUrl": "https://coffeeboard.gov.in/"
     }
   ],
-  "lastSuccessAt": "2026-11-21T07:30:41+00:00",
+  "lastSuccessAt": "2026-11-22T07:30:31+00:00",
   "fx": {
     "usd": {
-      "rate": 4.0176,
-      "date": "2026-11-19",
-      "no": "225/A/NBP/2026",
+      "rate": 4.0613,
+      "date": "2026-11-20",
+      "no": "226/A/NBP/2026",
       "source": "NBP tabela A"
     },
     "eur": {
