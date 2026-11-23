@@ -1,37 +1,35 @@
 {
-  "lastAttemptAt": "2026-11-22T07:30:31+00:00",
-  "errors": [
-    "NBP EUR: HTTP Error 404: Not Found"
-  ],
+  "lastAttemptAt": "2026-11-23T18:22:57+00:00",
+  "errors": [],
   "latest": {
-    "date": "2026-11-19",
-    "arabica": 282.05,
-    "robusta": 2998.0,
+    "date": "2026-11-20",
+    "arabica": 274.85,
+    "robusta": 2901.0,
     "contractA": "KCZ26",
     "contractR": "RCX26",
     "source": "Coffee Board of India — Futures Price",
     "sourceUrl": "https://coffeeboard.gov.in/"
   },
   "curve": {
-    "date": "2026-11-19",
+    "date": "2026-11-20",
     "arabica": [
       {
         "delivery": "2026-12",
         "label": "Dec-2026",
         "contract": "KCZ26",
-        "price": 282.05
+        "price": 274.85
       },
       {
         "delivery": "2027-03",
         "label": "Mar-2027",
         "contract": "KCH27",
-        "price": 276.0
+        "price": 268.5
       },
       {
         "delivery": "2027-05",
         "label": "May-2027",
         "contract": "KCK27",
-        "price": 268.2
+        "price": 262.1
       }
     ],
     "robusta": [
@@ -39,19 +37,19 @@
         "delivery": "2026-11",
         "label": "Nov-2026",
         "contract": "RCX26",
-        "price": 2998.0
+        "price": 2901.0
       },
       {
         "delivery": "2027-01",
         "label": "Jan-2027",
         "contract": "RCF27",
-        "price": 2978.0
+        "price": 2881.0
       },
       {
         "delivery": "2027-03",
         "label": "Mar-2027",
         "contract": "RCH27",
-        "price": 2941.0
+        "price": 2865.0
       }
     ]
   },
@@ -286,20 +284,29 @@
       "contractR": "RCX26",
       "source": "Coffee Board of India — Futures Price",
       "sourceUrl": "https://coffeeboard.gov.in/"
+    },
+    {
+      "date": "2026-11-20",
+      "arabica": 274.85,
+      "robusta": 2901.0,
+      "contractA": "KCZ26",
+      "contractR": "RCX26",
+      "source": "Coffee Board of India — Futures Price",
+      "sourceUrl": "https://coffeeboard.gov.in/"
     }
   ],
-  "lastSuccessAt": "2026-11-22T07:30:31+00:00",
+  "lastSuccessAt": "2026-11-23T18:22:57+00:00",
   "fx": {
     "usd": {
-      "rate": 4.0613,
-      "date": "2026-11-20",
-      "no": "226/A/NBP/2026",
+      "rate": 4.0601,
+      "date": "2026-11-23",
+      "no": "227/A/NBP/2026",
       "source": "NBP tabela A"
     },
     "eur": {
-      "rate": 4.4165,
-      "date": "2026-11-19",
-      "no": "225/A/NBP/2026",
+      "rate": 4.4556,
+      "date": "2026-11-23",
+      "no": "227/A/NBP/2026",
       "source": "NBP tabela A"
     }
   },
