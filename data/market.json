@@ -1,5 +1,5 @@
 {
-  "lastAttemptAt": "2026-11-23T18:22:57+00:00",
+  "lastAttemptAt": "2026-11-24T17:54:05+00:00",
   "errors": [],
   "latest": {
     "date": "2026-11-20",
@@ -295,18 +295,18 @@
       "sourceUrl": "https://coffeeboard.gov.in/"
     }
   ],
-  "lastSuccessAt": "2026-11-23T18:22:57+00:00",
+  "lastSuccessAt": "2026-11-24T17:54:05+00:00",
   "fx": {
     "usd": {
-      "rate": 4.0601,
-      "date": "2026-11-23",
-      "no": "227/A/NBP/2026",
+      "rate": 4.0819,
+      "date": "2026-11-24",
+      "no": "228/A/NBP/2026",
       "source": "NBP tabela A"
     },
     "eur": {
-      "rate": 4.4556,
-      "date": "2026-11-23",
-      "no": "227/A/NBP/2026",
+      "rate": 4.4633,
+      "date": "2026-11-24",
+      "no": "228/A/NBP/2026",
       "source": "NBP tabela A"
     }
   },
