@@ -1,6 +1,8 @@
 {
-  "lastAttemptAt": "2026-11-25T17:21:19+00:00",
-  "errors": [],
+  "lastAttemptAt": "2026-11-26T17:01:24+00:00",
+  "errors": [
+    "Coffee Board: Source session is older than saved session; retained saved prices"
+  ],
   "latest": {
     "date": "2026-11-24",
     "arabica": 262.6,
@@ -317,20 +319,21 @@
   "lastSuccessAt": "2026-11-25T17:21:19+00:00",
   "fx": {
     "usd": {
-      "rate": 4.0966,
-      "date": "2026-11-25",
-      "no": "229/A/NBP/2026",
+      "rate": 4.0835,
+      "date": "2026-11-26",
+      "no": "230/A/NBP/2026",
       "source": "NBP tabela A"
     },
     "eur": {
-      "rate": 4.4809,
-      "date": "2026-11-25",
-      "no": "229/A/NBP/2026",
+      "rate": 4.4802,
+      "date": "2026-11-26",
+      "no": "230/A/NBP/2026",
       "source": "NBP tabela A"
     }
   },
   "schemaVersion": 1,
   "warnings": [
-    "Financial Times: FT price outside session range. Próba źródła zapasowego."
+    "Financial Times: FT price outside session range. Próba źródła zapasowego.",
+    "Investing: HTTP Error 403: Forbidden. Próba źródła zapasowego."
   ]
 }
